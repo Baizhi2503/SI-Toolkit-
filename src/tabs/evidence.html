@@ -1,0 +1,64 @@
+<h2>Evidence Reordering & Video Processing Engine</h2>
+
+<div style="background: var(--bg-panel); border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <h4 style="margin: 0 0 10px 0; color: var(--accent);">Reverse Sequential Renamer</h4>
+    <div style="display: flex; gap: 10px;">
+        <input type="text" id="folderPathInput" placeholder="No folder selected..." readonly style="flex: 1;">
+        <button class="action-btn" id="selectFolderBtn" style="background-color: #341f97; white-space: nowrap;">Browse...</button>
+        <button class="action-btn" id="processImagesBtn" style="background-color: #2ed573; white-space: nowrap;">Run Sorting Engine</button>
+    </div>
+    <div id="sortingStatusBox" style="margin-top: 10px; padding: 10px; border-radius: 4px; background: #111; display: none; font-size: 13px;">
+        <span id="statusTitle" style="font-weight: bold;"></span> - <span id="statusText"></span>
+    </div>
+</div>
+
+<div style="background: var(--bg-panel); border: 1px solid var(--border); padding: 20px; border-radius: 8px;">
+    <h4 style="margin: 0 0 10px 0; color: var(--accent);">Media Player Helper</h4>
+    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+        <input type="text" id="videoPathDisplay" placeholder="No evidence video loaded..." readonly style="flex: 1;">
+        <button class="action-btn" id="selectVideoBtn" style="background-color: #341f97; white-space: nowrap;">Load Video</button>
+    </div>
+    
+    <video id="evidenceVideoPlayer" controls style="width: 100%; border-radius: 6px; background: #000; max-height: 360px; display: none;"></video>
+    <p id="videoHint" style="font-size: 12px; color: var(--text-muted); margin-top: 8px; display: none;">
+        Press <strong>Space</strong> to Play/Pause. Press <strong>Ctrl + S</strong> to capture frame. Press <strong>Left Arrow/Right Arrow</strong> to seek backward/forward.
+    </p>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin: 25px 0 10px 0; border-top: 1px solid var(--border); padding-top: 15px;">
+        <h4 style="margin: 0; color: var(--text-main);">Captured Case Frames Timeline</h4>
+        <button class="action-btn" id="exportGalleryBtn" style="background-color: #ff9f43; padding: 6px 14px; font-size: 13px;">Export Gallery to Folder</button>
+    </div>
+    
+    <div id="evidenceGalleryTimeline" style="display: flex; gap: 12px; overflow-x: auto; padding: 15px 10px; min-height: 110px; background: #111; border-radius: 6px; border: 1px solid var(--border);"></div>
+</div>
+
+<div id="annotationModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000;">
+    <div style="background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; width: 90%; max-width: 1100px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: flex; flex-direction: column; max-height: 90vh;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+            <h3 style="margin: 0; color: var(--accent);">Target Review Annotation Canvas</h3>
+            
+            <div style="display: flex; align-items: center; gap: 10px; background: #111116; padding: 5px 15px; border-radius: 4px; border: 1px solid var(--border);">
+                <span style="font-size: 12px; color: var(--text-muted);">🔍 Zoom:</span>
+                <input type="range" id="canvasZoomSlider" min="0.5" max="4" step="0.1" value="1" style="width: 100px; margin: 0; cursor: pointer;">
+                <span id="zoomPercentDisplay" style="font-size: 12px; font-weight: bold; min-width: 35px;">100%</span>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="action-btn" id="canvasHandBtn" style="background: #2ed573; padding: 8px 14px;">Hand Tool (1)</button>
+                <button class="action-btn" id="canvasRedBtn" style="background: #ff4757; padding: 8px 14px;">Solid Block (2)</button>
+                <button class="action-btn" id="canvasYellowBtn" style="background: #ffa502; padding: 8px 14px;">Highlight (3)</button>
+                <button class="action-btn" id="canvasCropBtn" style="background: #747d8c; padding: 8px 14px;">Crop (4)</button>
+                <button class="action-btn" id="canvasUndoBtn" style="background: #57606f; padding: 8px 14px;">(↩) Undo</button>
+                <button class="action-btn" id="canvasRedoBtn" style="background: #57606f; padding: 8px 14px;">(↪) Redo</button>
+                <button class="action-btn" id="canvasCancelBtn" style="background: #ff4757; padding: 8px 14px; font-weight: bold;">Cancel</button>
+                <button class="action-btn" id="canvasSaveBtn" style="background: #2ed573; padding: 8px 14px; font-weight: bold;">Done</button>
+            </div>
+        </div>
+        
+        <div id="canvasViewportContainer" style="flex: 1; overflow: hidden; background: #111; border-radius: 6px; border: 1px solid var(--border); position: relative; cursor: grab; min-height: 480px; width: 100%;">
+            <div id="canvasZoomWrapper" style="position: absolute; transform-origin: 0 0; display: block; background: transparent;">
+                <canvas id="evidenceAnnotationCanvas" style="box-shadow: 0 0 25px rgba(0,0,0,0.9); display: block; background: #1a1a1a;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>

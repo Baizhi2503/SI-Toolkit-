@@ -1,0 +1,22 @@
+# 📦 Build & Installer Outputs
+dist/
+
+# 📚 Dependency Directories
+node_modules/
+
+# 🕵️‍♂️ Personal Data Cache & App Database
+# Prevents sharing your personal local workspace files or credential stores
+.si_toolkit/
+sandbox_database.json
+
+# 🎥 Video Evidence & Large Media Extensions
+*.mp4
+*.mkv
+*.avi
+*.mov
+*.webm
+
+# 🔧 OS / IDE Local Junk
+.DS_Store
+Thumbs.db
+.vscode/

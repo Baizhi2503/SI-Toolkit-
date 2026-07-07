@@ -1,0 +1,30 @@
+<h2>Suspect Identity Profiling</h2>
+
+<div class="form-group">
+    <label for="ticketIdInput">Ticket ID Reference</label>
+    <input type="text" id="ticketIdInput" placeholder="e.g., ticket-0482">
+</div>
+
+<div style="margin: 20px 0 15px 0;">
+    <label style="display: block; margin-bottom: 8px;">Target Suspect Dossiers</label>
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <div id="suspectProfileTabsContainer" style="display: flex; gap: 6px; flex-wrap: wrap;">
+            </div>
+        <button id="addNewSuspectProfileBtn" style="background: #23232e; border: 1px dashed #ffa502; color: #ffa502; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 12px; cursor: pointer; transition: all 0.2s;">
+            ➕ Add Additional Suspect Dossier
+        </button>
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="idInput" id="activeSuspectInputLabel">Paste Suspect ID (Discord or Roblox)</label>
+    <input type="text" id="idInput" placeholder="Paste single ID or long list here...">
+    <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">App auto-detects Discord IDs vs numeric Roblox accounts.</p>
+</div>
+
+<h3>Tracked Targets</h3>
+<h4>Discord Profiles</h4>
+<div class="chip-container discord" id="discordChipsContainer"></div>
+
+<h4>Roblox Profiles</h4>
+<div class="chip-container roblox" id="robloxChipsContainer"></div>

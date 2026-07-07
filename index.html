@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SI Investigation Portal</title>
+    <style>
+        :root {
+            --bg-main: #141419;
+            --bg-sidebar: #1a1a24;
+            --bg-panel: #1e1e28;
+            --border: #2a2a38;
+            --accent: #ff4757;
+            --text-main: #f1f2f6;
+            --text-muted: #a4b0be;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar-nav li {
+            padding: 12px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-nav li:hover, .sidebar-nav li.active {
+            background-color: var(--bg-panel);
+            color: #fff;
+        }
+
+        .sidebar-nav li.active {
+            border-left: 3px solid var(--accent);
+            border-radius: 0 6px 6px 0;
+        }
+
+        .view-panel {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"], select, textarea {
+            width: 100%;
+            background-color: #111116;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px 14px;
+            color: #fff;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .action-btn {
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+
+        .chip-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+            background: #111116;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            min-height: 50px;
+        }
+
+        .chip {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: monospace;
+        }
+
+        .chip .copy-btn-node { cursor: pointer; transition: transform 0.1s ease; }
+        .chip .copy-btn-node:hover { transform: scale(1.2); }
+        .chip .remove-x { color: var(--accent); cursor: pointer; font-weight: bold; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-header" style="border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px;">
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                    <div style="display: flex; gap: 8px;">
+                        <button id="navHomeBtn" style="flex: 1; background: #333; border: 1px solid #444; color: #fff; padding: 6px; font-size: 11px; border-radius: 4px; cursor: pointer; font-weight: bold;">🏠 Home</button>
+                        <button id="destructiveDeleteCaseBtn" style="flex: 1; background: #111; border: 1px solid var(--accent); color: var(--accent); padding: 6px; font-size: 11px; border-radius: 4px; cursor: pointer; font-weight: bold;">🗑️ Delete</button>
+                    </div>
+                    <button id="manualSaveBtn" style="width: 100%; background: #ffa502; border: 1px solid #ffb142; color: #141419; padding: 6px; font-size: 11px; border-radius: 4px; cursor: pointer; font-weight: bold;">💾 Save Draft</button>
+                </div>
+                <small style="color: var(--text-muted); text-transform: uppercase; font-size: 10px; font-weight: 700; letter-spacing: 0.5px;">Case Workspace</small>
+                <div id="sidebarCaseId" style="font-size: 14px; font-weight: bold; color: var(--accent); font-family: monospace; word-break: break-all; margin-top: 2px;"></div>
+            </div>
+
+            <ul class="sidebar-nav">
+                <li class="active" data-target="idTrackerTab"> Suspect ID Tracker</li>
+                <li data-target="clipboardTab"> Clipboard Templates</li>
+                <li data-target="evidenceTab"> Evidence Management</li>
+                <li data-target="banLogTab"> Ban Log Generator</li>
+                <li data-target="notesChecklistTab">Notes & Checklist</li>
+            </ul>
+
+            <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border);">
+                <button class="action-btn" id="closeCaseBtn" style="background-color: var(--accent); width: 100%; padding: 12px; font-weight: bold; font-size: 13px;">🔒 Finalize Case</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div id="idTrackerTab" class="view-panel active">
+                <script>document.write(require('fs').readFileSync(require('path').join(__dirname, 'src/tabs/idTracker.html'), 'utf8'));</script>
+            </div>
+            <div id="clipboardTab" class="view-panel">
+                <script>document.write(require('fs').readFileSync(require('path').join(__dirname, 'src/tabs/clipboard.html'), 'utf8'));</script>
+            </div>
+            <div id="evidenceTab" class="view-panel">
+                <script>document.write(require('fs').readFileSync(require('path').join(__dirname, 'src/tabs/evidence.html'), 'utf8'));</script>
+            </div>
+            <div id="banLogTab" class="view-panel">
+                <script>document.write(require('fs').readFileSync(require('path').join(__dirname, 'src/tabs/banlog.html'), 'utf8'));</script>
+            </div>
+            <div id="notesChecklistTab" class="view-panel" style="display: none; flex-direction: column; gap: 20px; height: 100%;">
+                <div>
+                    <h2 style="color: #fff; margin: 0 0 10px 0; font-size: 20px; font-family: monospace;">📋 Step Progress Checklist Pipeline</h2>
+                    <div id="todoChecklistContainer" style="display: flex; flex-direction: column; gap: 10px; background: var(--bg-panel); border: 1px solid var(--border); padding: 20px; border-radius: 8px;">
+                        <label style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #111116; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; color: #fff; font-weight: 600; font-size: 13px;">
+                            <input type="radio" name="todoStepGroup" value="1" style="accent-color: var(--accent); width: 16px; height: 16px;"> STEP 1: Performing Background Checks
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #111116; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; color: #fff; font-weight: 600; font-size: 13px;">
+                            <input type="radio" name="todoStepGroup" value="2" style="accent-color: var(--accent); width: 16px; height: 16px;"> STEP 2: Contacting Victim
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #111116; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; color: #fff; font-weight: 600; font-size: 13px;">
+                            <input type="radio" name="todoStepGroup" value="3" style="accent-color: var(--accent); width: 16px; height: 16px;"> STEP 3: Contacting Suspect
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #111116; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; color: #fff; font-weight: 600; font-size: 13px;">
+                            <input type="radio" name="todoStepGroup" value="4" style="accent-color: var(--accent); width: 16px; height: 16px;"> STEP 4: Reviewing/Preparing Evidence Album
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #111116; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; color: #fff; font-weight: 600; font-size: 13px;">
+                            <input type="radio" name="todoStepGroup" value="5" style="accent-color: var(--accent); width: 16px; height: 16px;"> STEP 5: Preparing Ban Log
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #111116; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; color: #fff; font-weight: 600; font-size: 13px;">
+                            <input type="radio" name="todoStepGroup" value="6" style="accent-color: var(--accent); width: 16px; height: 16px;"> STEP 6: Sending Verdicts to Suspects/Victims
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #111116; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; color: #fff; font-weight: 600; font-size: 13px;">
+                            <input type="radio" name="todoStepGroup" value="7" style="accent-color: var(--accent); width: 16px; height: 16px;"> STEP 7: Finishing the ticket
+                        </label>
+                    </div>
+                </div>
+
+                <div style="flex: 1; display: flex; flex-direction: column;">
+                    <h2 style="color: #fff; margin: 0 0 10px 0; font-size: 20px; font-family: monospace;">📝 Case Operational Notes Logs</h2>
+                    <div style="flex: 1; position: relative;">
+                        <textarea id="caseNotesTextArea" placeholder="si_toolkit@root:~# enter manual scratchpad details here..." style="width: 100%; height: 100%; background: #0c0c10 !important; border: 1px solid #2a2a38 !important; border-radius: 8px !important; color: #32ff7e !important; font-family: 'Consolas', 'Courier New', monospace !important; font-size: 14px !important; padding: 20px !important; resize: none !important; line-height: 1.6 !important; outline: none !important; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="welcomeScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); z-index: 9999; display: flex; flex-direction: column; padding: 30px; overflow-y: auto;">
+        
+        <div style="position: fixed; top: 20px; left: 20px; z-index: 1100; display: flex; align-items: center; gap: 10px; background: #1e1e28; border: 1px solid var(--border); padding: 8px 15px; border-radius: 30px; cursor: pointer;" id="investigatorProfileBadge">
+            <div id="badgePfpPreview" style="width: 25px; height: 25px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 12px;">🕵️‍♂️</div>
+            <div style="display: flex; flex-direction: column;">
+                <span id="badgeNameText" style="font-size: 11px; font-weight: bold; color: #fff;">Setup Profile</span>
+                <span id="badgePositionText" style="font-size: 9px; color: var(--text-muted);">Click to setup</span>
+            </div>
+            <span id="profileWarningBanner" style="display: none; color: #ff4757; font-size: 12px;">⚠️</span>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 25px; padding-left: 160px;">
+            <div>
+                <h1 style="margin: 0; font-size: 28px; color: #fff; font-weight: 800;">SI Investigation Portal</h1>
+                <p style="margin: 5px 0 0 0; color: var(--text-muted); font-size: 13px;">Ready to hunt down some scammers?</p>
+            </div>
+            <button class="action-btn" id="newCaseBtn" style="background: var(--accent); padding: 12px 24px; font-size: 14px; font-weight: bold; border-radius: 6px;"> New Case </button>
+        </div>
+
+        <div id="portalDashboardLayout" style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; padding-left: 160px;">
+            <div>
+                <h3 style="color: #ffa502; margin-bottom: 15px; font-size: 15px;"> Active Investigations</h3>
+                <div id="pendingCasesContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+            </div>
+            <div>
+                <h3 style="color: #2ed573; margin-bottom: 15px; font-size: 15px;"> Finalized Action Logs</h3>
+                <div id="finalizedCasesContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="profileConfigModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,10,14,0.85); z-index: 100000; align-items: center; justify-content: center;">
+        <div style="background: var(--bg-panel); border: 1px solid var(--border); width: 400px; padding: 25px; border-radius: 12px; display: flex; flex-direction: column; gap: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: #fff; margin: 0;">👤 Investigator Profile Settings</h3>
+                <span id="closeProfileModalBtn" style="color: var(--text-muted); cursor: pointer; font-size: 20px; font-weight: bold;">&times;</span>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                <div id="modalPfpClickCircle" style="width: 80px; height: 80px; border-radius: 50%; background: #111116; border: 2px dashed var(--accent); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; font-size: 28px; position: relative;">
+                    <div id="modalPfpImage" style="width: 100%; height: 100%; display: none; background-size: cover; background-position: center;"></div>
+                    <span id="pfpPlaceholderEmoji">🕵️‍♂️</span>
+                </div>
+                <input type="file" id="pfpHiddenFileInput" accept="image/*" style="display: none;">
+            </div>
+
+            <div class="form-group">
+                <label>Investigator Signature Name</label>
+                <input type="text" id="profileNameInput" placeholder="Enter name...">
+            </div>
+
+            <div class="form-group">
+                <label>Assigned Operation Staff Position</label>
+                <select id="profilePositionSelect">
+                    <option value="Trial Scam Investigator">Trial Scam Investigator</option>
+                    <option value="Scam Investigator">Scam Investigator</option>
+                    <option value="Senior Scam Investigator">Senior Scam Investigator</option>
+                </select>
+            </div>
+
+            <button id="saveProfileBtn" class="action-btn" style="background: var(--accent); width: 100%; padding: 12px; font-weight: bold;">Save Profile</button>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>
