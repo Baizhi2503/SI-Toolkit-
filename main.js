@@ -1,6 +1,9 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
-const fs = require('fs'); // 🔥 Required to delete the test cache file
+const fs = require('fs'); 
+const { execFileSync } = require('child_process');
+const { spawn } = require('child_process');
+const ffmpegPath = require('ffmpeg-static');
 
 function createWindow () {
     const mainWindow = new BrowserWindow({
@@ -19,13 +22,11 @@ function createWindow () {
     mainWindow.loadFile('index.html');
 }
 
-// Stable Synchronous IPC bridge to tell the renderer if TEST_MODE is active
 ipcMain.on('check-test-mode', (event) => {
     event.returnValue = (process.env.TEST_MODE === 'true');
 });
 
 app.whenReady().then(() => {
-    // 🔥 CLEAR ACCOUNT DEV TRIGGER: If booting in rookie test mode, wipe the test database before the window draws!
     if (process.env.TEST_MODE === 'true') {
         const testDbPath = path.join(require('os').homedir(), '.si_toolkit', 'database.test.json');
         try {
@@ -49,7 +50,6 @@ app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') app.quit();
 });
 
-// Bulletproof IPC Dialog Handlers
 ipcMain.handle('dialog:showOpenDialog', async (event, options) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     return await dialog.showOpenDialog(win, options);
@@ -58,4 +58,33 @@ ipcMain.handle('dialog:showOpenDialog', async (event, options) => {
 ipcMain.handle('dialog:showSaveDialog', async (event, options) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     return await dialog.showSaveDialog(win, options);
+});
+
+ipcMain.handle('video:reverse', async (event, { inputPath, outputPath }) => {
+    return new Promise((resolve, reject) => {
+        const args = [
+            '-y',             
+            '-i', inputPath, 
+            '-vf', 'reverse', 
+            '-af', 'areverse',
+            outputPath        
+        ];
+
+        const ffmpegProcess = spawn(ffmpegPath, args);
+
+        ffmpegProcess.stderr.on('data', (data) => {
+        });
+
+        ffmpegProcess.on('close', (code) => {
+            if (code === 0) {
+                resolve({ success: true });
+            } else {
+                reject(new Error(`FFmpeg exited with error code ${code}`));
+            }
+        });
+
+        ffmpegProcess.on('error', (err) => {
+            reject(err);
+        });
+    });
 });

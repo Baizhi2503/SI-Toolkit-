@@ -1,14 +1,30 @@
 <h2>Evidence Reordering & Video Processing Engine</h2>
 
-<div style="background: var(--bg-panel); border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-    <h4 style="margin: 0 0 10px 0; color: var(--accent);">Reverse Sequential Renamer</h4>
-    <div style="display: flex; gap: 10px;">
-        <input type="text" id="folderPathInput" placeholder="No folder selected..." readonly style="flex: 1;">
-        <button class="action-btn" id="selectFolderBtn" style="background-color: #341f97; white-space: nowrap;">Browse...</button>
-        <button class="action-btn" id="processImagesBtn" style="background-color: #2ed573; white-space: nowrap;">Run Sorting Engine</button>
+<div class="evidence-panel-card" style="background: var(--bg-panel); border: 1px solid var(--border); padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px;">
+    <div>
+        <h4 style="color: #ff4757; margin: 0 0 5px 0; font-size: 15px; font-family: monospace;">🎥 Native Video Reverser Engine</h4>
+        <p style="color: var(--text-muted); margin: 0; font-size: 12px;">Reverse both video frames and audio tracks natively without freezing your Electron renderer thread.</p>
     </div>
-    <div id="sortingStatusBox" style="margin-top: 10px; padding: 10px; border-radius: 4px; background: #111; display: none; font-size: 13px;">
-        <span id="statusTitle" style="font-weight: bold;"></span> - <span id="statusText"></span>
+
+    <div style="display: flex; flex-direction: column; gap: 12px; background: #111116; padding: 15px; border-radius: 6px; border: 1px solid #2a2a38;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <button class="action-btn" id="selectInputVideoBtn" style="background: #341f97; font-size: 12px; padding: 6px 14px; min-width: 140px; white-space: nowrap;">Select Video File</button>
+            <span id="inputVideoPathDisplay" style="color: var(--text-muted); font-family: monospace; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">No source file imported...</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <button class="action-btn" id="selectOutputVideoBtn" style="background: #341f97; font-size: 12px; padding: 6px 14px; min-width: 140px; white-space: nowrap;">Export Destination</button>
+            <span id="outputVideoPathDisplay" style="color: var(--text-muted); font-family: monospace; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">No save location allocated...</span>
+        </div>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+        <button class="action-btn" id="executeVideoReverseBtn" style="background: #ff4757; font-weight: bold; padding: 8px 18px; font-size: 13px;" disabled>Begin Video Reverse</button>
+        
+        <div id="videoProcessingLoader" style="display: none; align-items: center; gap: 10px; font-family: monospace; font-size: 12px; color: #ffa502;">
+            <span class="spinner-loader" style="display: inline-block; width: 12px; height: 12px; border: 2px solid #ffa502; border-radius: 50%; border-top-color: transparent; animation: spin 0.8s linear infinite;"></span>
+            <span>FFmpeg rewriting tracks... Please wait...</span>
+        </div>
     </div>
 </div>
 
@@ -32,6 +48,7 @@
     <div id="evidenceGalleryTimeline" style="display: flex; gap: 12px; overflow-x: auto; padding: 15px 10px; min-height: 110px; background: #111; border-radius: 6px; border: 1px solid var(--border);"></div>
 </div>
 
+<!-- Annotation modal markup remains untouched underneath -->
 <div id="annotationModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000;">
     <div style="background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; width: 90%; max-width: 1100px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: flex; flex-direction: column; max-height: 90vh;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
@@ -62,3 +79,7 @@
         </div>
     </div>
 </div>
+
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>

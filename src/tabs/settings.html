@@ -17,7 +17,6 @@
     </div>
 
     <div class="main-content" style="flex: 1; padding: 30px; display: flex; flex-direction: column; gap: 20px; user-select: auto !important; pointer-events: auto !important; overflow-y: auto;">
-        <!-- Tab 1: Profile Details -->
         <div id="settingsProfileTab" class="settings-view-panel" style="display: flex; flex-direction: column; gap: 20px;">
             <h2 style="color: #fff; font-family: monospace; font-size: 22px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Identity Verification Signature</h2>
             
@@ -49,13 +48,11 @@
             </div>
         </div>
 
-        <!-- Tab 2: Message Templates -->
         <div id="settingsTemplatesTab" class="settings-view-panel" style="display: none; flex-direction: column; gap: 15px; height: 100%;">
             <h2 style="color: #fff; font-family: monospace; font-size: 22px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Custom Embedded Templates Engine</h2>
             
             <div style="background: var(--bg-panel); border: 1px solid var(--border); padding: 20px; border-radius: 8px; display: flex; flex-direction: column; gap: 15px; flex: 1; min-height: 0;">
                 
-                <!-- 🎯 Descriptive Glossary Layout -->
                 <div style="display: flex; gap: 20px; align-items: stretch; justify-content: space-between; border-bottom: 1px solid #2a2a38; padding-bottom: 15px;">
                     <div class="form-group" style="width: 45%; margin-bottom: 0; display: flex; flex-direction: column; gap: 6px; justify-content: center;">
                         <label>Select Template Viewport Editor Context</label>
@@ -66,7 +63,6 @@
                         </select>
                     </div>
 
-                    <!-- 📋 SCROLLABLE GLOSSARY LIST -->
                     <div style="flex: 1; background: #111116; border: 1px solid var(--border); padding: 12px 15px; border-radius: 6px; max-height: 130px; overflow-y: auto;">
                         <label style="color: #ffa502; font-size: 10px; margin-bottom: 8px; display: block; letter-spacing: 0.5px;">📋 Token Glossary Guide (Case Sensitive)</label>
                         <div style="display: flex; flex-direction: column; gap: 6px; font-family: 'Consolas', monospace; font-size: 11px; color: #cbd5e1;">
@@ -102,7 +98,6 @@
                     </div>
                 </div>
 
-                <!-- Textarea views remain exactly the same underneath -->
                 <div style="flex: 1; display: flex; flex-direction: column; min-height: 200px; margin-top: 5px;">
                     <div id="settingsTplVictimWrapper" style="display: flex; flex-direction: column; flex: 1; gap: 6px;">
                         <label style="color: #ff9f43; font-size: 11px;">Victim Video Request Notice Template String Markup</label>

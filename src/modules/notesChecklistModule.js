@@ -1,9 +1,7 @@
-// src/modules/notesChecklistModule.js
 const BaseModule = require('../core/BaseModule');
 
 class NotesChecklistModule extends BaseModule {
     constructor() {
-        // Inherits blueprint visibility and state properties mapping to the single panel container
         super('NotesChecklistManager', 'notesChecklistTab', 'notesChecklistTab');
     }
 
@@ -21,7 +19,6 @@ class NotesChecklistModule extends BaseModule {
             }
         };
 
-        // Fire auto-save loops natively when keys are hit or statuses step forward
         if (this.notesArea) {
             this.notesArea.addEventListener('input', triggerSave);
         }
@@ -34,25 +31,20 @@ class NotesChecklistModule extends BaseModule {
     onActivate() {
         this.syncUI(this.app.getCurrentCase());
     }
-
-    // --- PUBLIC INTERFACE CONTROL APIS ---
     
     syncUI(currentCase) {
         if (!currentCase) return;
 
-        // 1. Populate scratchpad notes entries
         if (this.notesArea) {
             this.notesArea.value = currentCase.notes || '';
         }
 
-        // 2. Select the matching pipeline step index badge
         const stepValue = currentCase.currentStep || 1;
         const targetRadio = document.querySelector(`input[name="todoStepGroup"][value="${stepValue}"]`);
         if (targetRadio) {
             targetRadio.checked = true;
         }
 
-        // 3. Structural finalization lock pass
         const isLocked = !!currentCase.isFinalized;
         if (this.notesArea) this.notesArea.disabled = isLocked;
         this.stepRadios.forEach(radio => {

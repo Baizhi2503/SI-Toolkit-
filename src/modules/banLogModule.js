@@ -4,7 +4,6 @@ class BanLogModule extends BaseModule {
     constructor() {
         super('BanLogManager', 'banLogTab', 'banLogTab');
         
-        // 🔒 Internal Array State tracking[cite: 8]
         this.generatedChunksMatrix = []; 
         this.activeChunkMatrixIndex = 0;
     }
@@ -86,7 +85,6 @@ class BanLogModule extends BaseModule {
 
         if (this.ticketIdInput) this.ticketIdInput.value = currentCase.ticketId || '';
         
-        // Populate fields from active case metadata
         if (this.lengthInput) this.lengthInput.value = currentCase.banLength || '';
         if (this.evidenceInput) this.evidenceInput.value = currentCase.evidenceLink || '';
 
@@ -102,7 +100,6 @@ class BanLogModule extends BaseModule {
         this.generatedChunksMatrix = [];
         const suspectsList = currentCase.suspects || [];
 
-        // Build the matrices based on 9-ID chunking limits[cite: 8]
         suspectsList.forEach((suspect) => {
             const dIds = Array.isArray(suspect.discordIds) ? suspect.discordIds : [];
             const rIds = Array.isArray(suspect.robloxIds) ? suspect.robloxIds : [];

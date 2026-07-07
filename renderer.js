@@ -70,7 +70,6 @@ function main() {
 
     let autoSaveTimeout = null;
 
-    // Secure UI sync parsing
     window.syncInvestigatorProfileUI = () => {
         const profile = app.db.investigatorProfile || {};
         const nameText = document.getElementById('badgeNameText');
@@ -307,7 +306,6 @@ function main() {
         const dashboardLayout = document.getElementById('portalDashboardLayout');
         const newCaseBtn = document.getElementById('newCaseBtn');
         
-        // Dynamic View Panel Elements
         const profileBadge = document.getElementById('investigatorProfileBadge');
         const onboardingCard = document.getElementById('onboardingCardView');
         const coreDashboardWrapper = document.getElementById('dashboardCoreLayoutWrapper');
@@ -317,24 +315,19 @@ function main() {
         pContainer.innerHTML = ''; 
         fContainer.innerHTML = '';
         
-        // Check if user has an empty investigator identity name setup
         const isNewUser = !app.db.investigatorProfile.name || app.db.investigatorProfile.name.trim() === '';
         
         if (isNewUser) {
-            // State A: Hide standard dashboard spaces and strip profile badge access entirely
             if (coreDashboardWrapper) coreDashboardWrapper.style.display = 'none';
             if (profileBadge) profileBadge.style.display = 'none';
             
-            // Render the centered welcome text splash card
             if (onboardingCard) {
                 onboardingCard.style.display = 'flex';
                 
-                // Assign clean trigger handler onto the 'Proceed' element link
                 const proceedBtn = document.getElementById('onboardingProceedBtn');
                 if (proceedBtn) {
                     proceedBtn.onclick = (e) => {
                         e.preventDefault();
-                        // Instantly launch the Settings Overlay Module via global instance reference
                         const settingsMod = app.getModule('SettingsManager');
                         if (settingsMod && typeof settingsMod.launchSettingsOverlay === 'function') {
                             settingsMod.launchSettingsOverlay();
@@ -343,7 +336,6 @@ function main() {
                 }
             }
         } else {
-            // State B: Show full operative interface space safely
             if (onboardingCard) onboardingCard.style.display = 'none';
             if (coreDashboardWrapper) coreDashboardWrapper.style.display = 'flex';
             if (profileBadge) profileBadge.style.display = 'flex'; 

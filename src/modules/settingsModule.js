@@ -154,15 +154,12 @@ class SettingsModule extends BaseModule {
         
         StorageController.save(this.app.db);
         
-        // 2. Synchronize badge profile UI elements instantly
         if (typeof window.syncInvestigatorProfileUI === 'function') {
             window.syncInvestigatorProfileUI();
         }
 
-        // 3. Close the settings overlay panel display
         this.settingsScreen.style.display = 'none';
 
-        // 4. 🔥 LIVE DASHBOARD TRANSITION (No hard app reloads)
         const onboardingCard = document.getElementById('onboardingCardView');
         const coreDashboardWrapper = document.getElementById('dashboardCoreLayoutWrapper');
         const profileBadge = document.getElementById('investigatorProfileBadge');
@@ -171,12 +168,9 @@ class SettingsModule extends BaseModule {
         const newCaseBtn = document.getElementById('newCaseBtn');
         const subHeader = document.querySelector('#welcomeScreen p');
 
-        // Check if we just finalized onboarding setup from an empty user state
         if (inputName !== '') {
-            // Dismiss introduction splash dialog completely
             if (onboardingCard) onboardingCard.style.display = 'none';
             
-            // Bring forward full operational dashboard elements onto view screen
             if (coreDashboardWrapper) coreDashboardWrapper.style.display = 'flex';
             if (profileBadge) profileBadge.style.display = 'flex';
             if (dashboardLayout) dashboardLayout.style.display = 'grid';
@@ -187,8 +181,6 @@ class SettingsModule extends BaseModule {
                 subHeader.style.color = 'var(--text-muted)';
             }
 
-            // Force dynamic case listings to evaluate data vectors safely without crashing
-            // Force dynamic case listings to evaluate data vectors safely without crashing
             const pContainer = document.getElementById('pendingCasesContainer');
             const fContainer = document.getElementById('finalizedCasesContainer');
             

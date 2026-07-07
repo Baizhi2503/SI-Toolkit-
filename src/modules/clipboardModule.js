@@ -4,7 +4,6 @@ class ClipboardModule extends BaseModule {
     constructor() {
         super('Clipboard', 'clipboardTab', 'clipboardTab');
         
-        // Strict mapping linking tokens directly to explicit HTML Input Element IDs
         this.tokenConfig = [
             { token: '[DATE]', id: 'tokenDate' },
             { token: '[SUSPECT_USERNAME]', id: 'tokenSuspectUser' },
@@ -12,7 +11,7 @@ class ClipboardModule extends BaseModule {
             { token: '[S_REASON]', id: 'tokenSReason' },
             { token: '[REASON]', id: 'tokenReason' },
             { token: '[V_REASON]', id: 'tokenVReason' },
-            { token: '[EVIDENCE]', id: 'evidenceFormGroup' }, // Handles the parent wrapper block
+            { token: '[EVIDENCE]', id: 'evidenceFormGroup' }, 
             { token: '[MESSAGE]', id: 'tokenMessage' }
         ];
     }
@@ -21,7 +20,6 @@ class ClipboardModule extends BaseModule {
         this.clipboardContainer = document.getElementById('clipboardTab');
         if (!this.clipboardContainer) return;
 
-        // Strict Element Selection based on your exact Frontend IDs
         this.templateSelector = document.getElementById('templateSelectorDropdown');
         this.livePreviewDisplay = document.getElementById('discordOutputLivePreview');
         this.copyBtn = document.getElementById('copyCompiledMessageBtn');
@@ -37,12 +35,10 @@ class ClipboardModule extends BaseModule {
     }
 
     setupClipboardListeners() {
-        // 1. Dropdown template switcher handler
         if (this.templateSelector) {
             this.templateSelector.addEventListener('change', () => this.renderClipboardContent());
         }
 
-        // 2. Real-time token substitution stream typing listener
         if (this.clipboardContainer) {
             this.clipboardContainer.addEventListener('input', (e) => {
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
@@ -51,7 +47,6 @@ class ClipboardModule extends BaseModule {
             });
         }
 
-        // 3. Bulletproof Copy Message Execution Action
         if (this.copyBtn) {
             this.copyBtn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -70,7 +65,6 @@ class ClipboardModule extends BaseModule {
             });
         }
 
-        // 4. Dynamic Evidence Row Append Engine
         if (this.addEvidenceBtn && this.evidenceContainer) {
             this.addEvidenceBtn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -88,7 +82,6 @@ class ClipboardModule extends BaseModule {
                 this.updatePreviewTextOnly();
             });
 
-            // Inline delegator to handle dynamic row deletions safely
             this.evidenceContainer.addEventListener('click', (e) => {
                 if (e.target.classList.contains('remove-evidence-row-btn')) {
                     e.target.parentElement.remove();
@@ -97,7 +90,6 @@ class ClipboardModule extends BaseModule {
             });
         }
 
-        // 5. Scam Rules Node Copy Injection Interface
         const quickRuleNodes = this.clipboardContainer.querySelectorAll('.quick-rule-node');
         quickRuleNodes.forEach(node => {
             node.addEventListener('click', (e) => {
@@ -127,11 +119,9 @@ class ClipboardModule extends BaseModule {
     renderClipboardContent() {
         const rawTemplateText = this.getRawActiveTemplate();
 
-        // Formal Show/Hide Token Toggle Processing Loop
         this.tokenConfig.forEach(config => {
             const inputEl = document.getElementById(config.id);
             if (inputEl) {
-                // Climb up tree structure to hit the parent field row container safely
                 const fieldGroupWrapper = inputEl.closest('.form-group') || inputEl.parentElement;
                 if (fieldGroupWrapper) {
                     const tokenIsPresent = rawTemplateText.includes(config.token);
@@ -176,7 +166,6 @@ class ClipboardModule extends BaseModule {
                 value = inputEl ? inputEl.value.trim() : '';
             }
 
-            // Fall back to showing raw bracket tokens if fields are left entirely blank
             if (value === '') {
                 value = config.token;
             }

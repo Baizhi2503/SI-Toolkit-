@@ -1,15 +1,12 @@
-// src/core/BaseModule.js
 
 class BaseModule {
     constructor(moduleName, tabTargetId, panelId) {
-        // Encapsulation: Storing the DOM elements specific to this module
         this.moduleName = moduleName;
         this.tabElement = document.querySelector(`[data-target="${tabTargetId}"]`);
         this.panelElement = document.getElementById(panelId);
-        this.app = null; // This will hold the global app state
+        this.app = null; 
     }
 
-    // Abstraction: These methods act as hooks for the child classes
     onInit() { console.log(`${this.moduleName} initialized.`); }
     onActivate() { }
     onDeactivate() { }
