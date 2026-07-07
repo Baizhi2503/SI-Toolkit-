@@ -1,229 +1,191 @@
-// src/modules/clipboardModule.js
 const BaseModule = require('../core/BaseModule');
-
-// 📦 HARDCODED FACTORY REGISTRY: Holds your production layouts verbatim
-const embeddedTemplatesRegistry = {
-    victimDm: `# <:SI:1169019875814023178> Greetings,\n\nI am here to inform you about the scam report you have opened on [DATE]\n**Ticket Copy: [attached below]**\n\nTo continue with your case, we would require the following:-\n- **A video recording of your DMs with the suspect**\n\nYou have 24 hours to provide the requirements. Failure to provide it under the timeframe would result in closing ticket and you have to open a new ticket to report again,\n\nWith regards,\n**Baizhi**\n**Scam Investigator <:SI:1169019875814023178> **\n**HiddenDevs <:HiddenDevs:929518256782450749> **`,
-    
-    suspectDm: `# <:SI:1169019875814023178> Greetings,\n\nI am here to inform you that you're being reported by [VICTIM_USERNAME] for [REASON].\n**Ticket Copy: [attached below]**\n**Evidence: [EVIDENCE]**\n\nYou have 24 hours to defend yourself regarding this case. Failure to co-operate or respond within the given timeframe will result in a ban.\n\nSincerely,\n**Baizhi**\n**Scam Investigator <:SI:1169019875814023178> **\n**HiddenDevs <:HiddenDevs:929518256782450749> **`,
-    
-    verdict: `# <:SI:1169019875814023178> Greetings,\n\nOn reviewing this case in depth, I have reached out with a final verdict:-\n\n**Suspect [(SUSPECT_USERNAME)]: [INNOCENT/REASON]**\n**Victim [(VICTIM_USERNAME)]: [INNOCENT/REASON]**\n**Evidence: [EVIDENCE]**\n\n[MESSAGE]\n\nWith regards,\n**Baizhi**\n**Scam Investigator <:SI:1169019875814023178> **\n**HiddenDevs <:HiddenDevs:929518256782450749> **`
-};
 
 class ClipboardModule extends BaseModule {
     constructor() {
-        super('ClipboardManager', 'clipboardTab', 'clipboardTab');
+        super('Clipboard', 'clipboardTab', 'clipboardTab');
+        
+        // Strict mapping linking tokens directly to explicit HTML Input Element IDs
+        this.tokenConfig = [
+            { token: '[DATE]', id: 'tokenDate' },
+            { token: '[SUSPECT_USERNAME]', id: 'tokenSuspectUser' },
+            { token: '[VICTIM_USERNAME]', id: 'tokenVictimUser' },
+            { token: '[S_REASON]', id: 'tokenSReason' },
+            { token: '[REASON]', id: 'tokenReason' },
+            { token: '[V_REASON]', id: 'tokenVReason' },
+            { token: '[EVIDENCE]', id: 'evidenceFormGroup' }, // Handles the parent wrapper block
+            { token: '[MESSAGE]', id: 'tokenMessage' }
+        ];
     }
 
     onInit() {
-        this.dropdownSelector = document.getElementById('templateSelectorDropdown');
-        this.livePreviewArea = document.getElementById('discordOutputLivePreview');
-        this.copyMessageBtn = document.getElementById('copyCompiledMessageBtn');
+        this.clipboardContainer = document.getElementById('clipboardTab');
+        if (!this.clipboardContainer) return;
+
+        // Strict Element Selection based on your exact Frontend IDs
+        this.templateSelector = document.getElementById('templateSelectorDropdown');
+        this.livePreviewDisplay = document.getElementById('discordOutputLivePreview');
+        this.copyBtn = document.getElementById('copyCompiledMessageBtn');
         this.addEvidenceBtn = document.getElementById('addEvidenceBtn');
-        this.evidenceListContainer = document.getElementById('evidenceListContainer');
+        this.evidenceContainer = document.getElementById('evidenceListContainer');
 
-        // Scalable Dictionary for Token Inputs
-        this.tokenInputs = {
-            date: document.getElementById('tokenDate'),
-            suspectUser: document.getElementById('tokenSuspectUser'),
-            victimUser: document.getElementById('tokenVictimUser'),
-            sReason: document.getElementById('tokenSReason'),
-            reason: document.getElementById('tokenReason'),
-            vReason: document.getElementById('tokenVReason'),
-            evidence: document.getElementById('evidenceFormGroup'), // Target the parent wrapper now
-            message: document.getElementById('tokenMessage')
-        };
-
-        this.setupListeners();
-        this.triggerLivePreviewRender();
-    }
-
-    setupListeners() {
-        const renderTrigger = () => this.triggerLivePreviewRender();
-
-        if (this.dropdownSelector) {
-            this.dropdownSelector.addEventListener('change', renderTrigger);
-        }
-
-        Object.keys(this.tokenInputs).forEach(key => {
-            const el = this.tokenInputs[key];
-            if (!el) return;
-
-            // Specialized listener attachment for the dynamic evidence group
-            if (key === 'evidence') {
-                el.querySelectorAll('input').forEach(inp => {
-                    inp.addEventListener('input', renderTrigger);
-                    inp.addEventListener('change', renderTrigger);
-                });
-            } else {
-                el.addEventListener('input', renderTrigger);
-                el.addEventListener('change', renderTrigger);
-            }
-        });
-
-        // 🆕 Dynamic Add Evidence Button Logic
-        if (this.addEvidenceBtn && this.evidenceListContainer) {
-            this.addEvidenceBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                const currentRows = this.evidenceListContainer.querySelectorAll('.evidence-row').length;
-                if (currentRows >= 9) {
-                    alert("Discord embed limits prevent adding more than 9 markdown links!");
-                    return;
-                }
-
-                const row = document.createElement('div');
-                row.className = 'evidence-row';
-                row.style.cssText = 'display: flex; gap: 8px; align-items: center;';
-                row.innerHTML = `
-                    <input type="text" class="evidence-name" placeholder="Eg: Screenshot" style="flex: 1; min-width: 0;">
-                    <input type="text" class="evidence-url" placeholder="Eg: https://..." style="flex: 2; min-width: 0;">
-                    <span class="remove-evidence-btn" style="color: #ff4757; font-size: 16px; font-weight: bold; cursor: pointer; line-height: 1; padding: 0 4px;">&times;</span>
-                `;
-
-                // Attach render triggers to the newly spawned inputs
-                row.querySelectorAll('input').forEach(inp => {
-                    inp.addEventListener('input', renderTrigger);
-                    inp.addEventListener('change', renderTrigger);
-                });
-
-                // Attach self-destruct logic to the 'X' button
-                row.querySelector('.remove-evidence-btn').addEventListener('click', (ev) => {
-                    ev.preventDefault();
-                    row.remove();
-                    this.triggerLivePreviewRender();
-                });
-
-                this.evidenceListContainer.appendChild(row);
-                this.triggerLivePreviewRender();
-            });
-        }
-
-        if (this.copyMessageBtn) {
-            this.copyMessageBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (!this.livePreviewArea) return;
-
-                navigator.clipboard.writeText(this.livePreviewArea.value);
-                const nativeLabelText = this.copyMessageBtn.textContent;
-                this.copyMessageBtn.textContent = "✅ Message Dispatched!";
-                this.copyMessageBtn.style.background = "#2ed573";
-                
-                setTimeout(() => {
-                    this.copyMessageBtn.textContent = nativeLabelText;
-                    this.copyMessageBtn.style.background = "#341f97";
-                }, 1200);
-            });
-        }
-
-        document.querySelectorAll('.quick-rule-node').forEach(node => {
-            node.addEventListener('click', (e) => {
-                e.preventDefault();
-                const textToCopy = node.getAttribute('data-rule');
-                if (textToCopy) {
-                    navigator.clipboard.writeText(textToCopy);
-                    const originalText = node.textContent;
-                    node.textContent = "Copied!";
-                    node.style.color = "#2ed573";
-                    setTimeout(() => {
-                        node.textContent = originalText;
-                        node.style.color = "var(--text-muted)";
-                    }, 1000);
-                }
-            });
-        });
+        this.setupClipboardListeners();
+        this.renderClipboardContent();
     }
 
     onActivate() {
-        if (typeof window.syncInvestigatorProfileUI === 'function') {
-            window.syncInvestigatorProfileUI();
-        }
-        this.triggerLivePreviewRender();
+        this.renderClipboardContent();
     }
 
-    triggerLivePreviewRender() {
-        if (!this.dropdownSelector || !this.livePreviewArea) return;
-        const activeTemplateKey = this.dropdownSelector.value;
+    setupClipboardListeners() {
+        // 1. Dropdown template switcher handler
+        if (this.templateSelector) {
+            this.templateSelector.addEventListener('change', () => this.renderClipboardContent());
+        }
 
-        const templateFieldMap = {
-            victimDm: ['date'], 
-            suspectDm: ['victimUser', 'reason', 'evidence'], 
-            verdict: ['suspectUser', 'victimUser', 'sReason', 'vReason', 'evidence', 'message']
-        };
+        // 2. Real-time token substitution stream typing listener
+        if (this.clipboardContainer) {
+            this.clipboardContainer.addEventListener('input', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    this.updatePreviewTextOnly();
+                }
+            });
+        }
 
-        const activeFields = templateFieldMap[activeTemplateKey] || [];
+        // 3. Bulletproof Copy Message Execution Action
+        if (this.copyBtn) {
+            this.copyBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!this.livePreviewDisplay) return;
+                
+                const content = this.livePreviewDisplay.value;
+                navigator.clipboard.writeText(content).then(() => {
+                    const prevLabel = this.copyBtn.textContent;
+                    this.copyBtn.textContent = '✅ Copied to Clipboard!';
+                    this.copyBtn.style.background = '#2ed573';
+                    setTimeout(() => {
+                        this.copyBtn.textContent = prevLabel;
+                        this.copyBtn.style.background = '';
+                    }, 1200);
+                });
+            });
+        }
 
-        Object.keys(this.tokenInputs).forEach(key => {
-            const inputElement = this.tokenInputs[key];
-            if (inputElement) {
-                const wrapper = inputElement.closest('.form-group');
-                if (wrapper) {
-                    wrapper.style.display = activeFields.includes(key) ? 'flex' : 'none';
+        // 4. Dynamic Evidence Row Append Engine
+        if (this.addEvidenceBtn && this.evidenceContainer) {
+            this.addEvidenceBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                const newRow = document.createElement('div');
+                newRow.className = 'evidence-row';
+                newRow.style.cssText = 'display: flex; gap: 8px; align-items: center; margin-top: 8px;';
+                newRow.innerHTML = `
+                    <input type="text" class="evidence-name" placeholder="Eg: Video" style="flex: 1; min-width: 0;">
+                    <input type="text" class="evidence-url" placeholder="Eg: https://youtube.com/..." style="flex: 2; min-width: 0;">
+                    <span class="remove-evidence-row-btn" style="color: var(--accent); cursor: pointer; font-weight: bold; font-size: 14px; padding: 0 4px;">×</span>
+                `;
+                
+                this.evidenceContainer.appendChild(newRow);
+                this.updatePreviewTextOnly();
+            });
+
+            // Inline delegator to handle dynamic row deletions safely
+            this.evidenceContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-evidence-row-btn')) {
+                    e.target.parentElement.remove();
+                    this.updatePreviewTextOnly();
+                }
+            });
+        }
+
+        // 5. Scam Rules Node Copy Injection Interface
+        const quickRuleNodes = this.clipboardContainer.querySelectorAll('.quick-rule-node');
+        quickRuleNodes.forEach(node => {
+            node.addEventListener('click', (e) => {
+                const rulePayload = node.getAttribute('data-rule');
+                if (!rulePayload) return;
+
+                navigator.clipboard.writeText(rulePayload).then(() => {
+                    const nativeLabel = node.textContent;
+                    node.textContent = 'Copied!';
+                    node.style.color = '#2ed573';
+                    setTimeout(() => {
+                        node.textContent = nativeLabel;
+                        node.style.color = '';
+                    }, 1200);
+                });
+            });
+        });
+    }
+
+    getRawActiveTemplate() {
+        if (!this.app || !this.app.db) return '';
+        const templates = this.app.db.customTemplates || {};
+        const activeKey = this.templateSelector ? this.templateSelector.value : 'victimDm';
+        return templates[activeKey] || '';
+    }
+
+    renderClipboardContent() {
+        const rawTemplateText = this.getRawActiveTemplate();
+
+        // Formal Show/Hide Token Toggle Processing Loop
+        this.tokenConfig.forEach(config => {
+            const inputEl = document.getElementById(config.id);
+            if (inputEl) {
+                // Climb up tree structure to hit the parent field row container safely
+                const fieldGroupWrapper = inputEl.closest('.form-group') || inputEl.parentElement;
+                if (fieldGroupWrapper) {
+                    const tokenIsPresent = rawTemplateText.includes(config.token);
+                    fieldGroupWrapper.style.display = tokenIsPresent ? 'flex' : 'none';
+                    if (tokenIsPresent && fieldGroupWrapper.classList.contains('form-group')) {
+                        fieldGroupWrapper.style.flexDirection = 'column';
+                    }
                 }
             }
         });
 
-        this.livePreviewArea.value = this.compileTemplate(activeTemplateKey);
+        this.updatePreviewTextOnly();
     }
 
-    getValueOrDefault(element, defaultPlaceholderValue) {
-        if (element && element.value.trim() !== "") {
-            return element.value.trim();
-        }
-        return defaultPlaceholderValue;
-    }
+    updatePreviewTextOnly() {
+        if (!this.livePreviewDisplay) return;
 
-    compileTemplate(templateType) {
-        let output = embeddedTemplatesRegistry[templateType] || '';
-        
-        // 🆕 1. Parse all dynamic evidence rows into Discord markdown array
-        let compiledEvidenceMarkdown = '[EVIDENCE]';
-        if (this.evidenceListContainer) {
-            const rows = this.evidenceListContainer.querySelectorAll('.evidence-row');
-            const validLinks = [];
-            
-            rows.forEach((row, idx) => {
-                const rawUrl = row.querySelector('.evidence-url').value.trim();
-                if (rawUrl) {
-                    // Fallback to "Evidence X" if they paste a URL but leave the name blank
-                    const linkName = row.querySelector('.evidence-name').value.trim() || `Evidence ${idx + 1}`;
-                    validLinks.push(`[${linkName}](${rawUrl})`);
-                }
-            });
+        let compiledOutput = this.getRawActiveTemplate();
+        const currentCase = this.app.getCurrentCase();
 
-            if (validLinks.length > 0) {
-                compiledEvidenceMarkdown = validLinks.join(' | '); // Separates multiple links cleanly
+        this.tokenConfig.forEach(config => {
+            let value = '';
+
+            if (config.token === '[EVIDENCE]') {
+                const evidenceLinks = [];
+                const rows = this.clipboardContainer.querySelectorAll('.evidence-row');
+                
+                rows.forEach(row => {
+                    const nameInput = row.querySelector('.evidence-name');
+                    const urlInput = row.querySelector('.evidence-url');
+                    const nameVal = nameInput ? nameInput.value.trim() : '';
+                    const urlVal = urlInput ? urlInput.value.trim() : '';
+                    
+                    if (nameVal && urlVal) evidenceLinks.push(`[${nameVal}](${urlVal})`);
+                    else if (nameVal) evidenceLinks.push(nameVal);
+                    else if (urlVal) evidenceLinks.push(urlVal);
+                });
+                
+                value = evidenceLinks.length > 0 ? evidenceLinks.join(' | ') : '';
+            } else {
+                const inputEl = document.getElementById(config.id);
+                value = inputEl ? inputEl.value.trim() : '';
             }
-        }
 
-        const vals = {
-            date: this.getValueOrDefault(this.tokenInputs.date, '[DATE]'),
-            suspectUser: this.getValueOrDefault(this.tokenInputs.suspectUser, '[SUSPECT_USERNAME]'),
-            victimUser: this.getValueOrDefault(this.tokenInputs.victimUser, '[VICTIM_USERNAME]'),
-            sReason: this.getValueOrDefault(this.tokenInputs.sReason, '[S_REASON]'),
-            reason: this.getValueOrDefault(this.tokenInputs.reason, '[REASON]'),
-            vReason: this.getValueOrDefault(this.tokenInputs.vReason, '[V_REASON]'),
-            evidence: compiledEvidenceMarkdown, // Inject the compiled array string
-            message: this.getValueOrDefault(this.tokenInputs.message, '[MESSAGE]')
-        };
+            // Fall back to showing raw bracket tokens if fields are left entirely blank
+            if (value === '') {
+                value = config.token;
+            }
 
-        output = output.replace(/\[DATE\]/g, vals.date);
-        output = output.replace(/\[VICTIM_USERNAME\]/g, vals.victimUser);
-        output = output.replace(/\[REASON\]/g, vals.reason);
-        output = output.replace(/\[SUSPECT_USERNAME\]/g, vals.suspectUser);
-        
-        output = output.replace(/\(SUSPECT_USERNAME\)/g, vals.suspectUser);
-        output = output.replace(/\(VICTIM_USERNAME\)/g, vals.victimUser);
-        output = output.replace(/\[INNOCENT\/REASON\]/g, vals.sReason);
-        
-        if (templateType === 'verdict') {
-            output = output.replace(`**Victim (${vals.victimUser}): ${vals.sReason}**`, `**Victim (${vals.victimUser}): ${vals.vReason}**`);
-        }
-        
-        output = output.replace(/\[EVIDENCE\]/g, vals.evidence);
-        output = output.replace(/\[MESSAGE\]/g, vals.message);
+            const safeTokenRegex = new RegExp(config.token.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g');
+            compiledOutput = compiledOutput.replace(safeTokenRegex, value);
+        });
 
-        return output;
+        this.livePreviewDisplay.value = compiledOutput;
     }
 }
 

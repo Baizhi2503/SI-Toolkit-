@@ -30,7 +30,7 @@ app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') app.quit();
 });
 
-// 🔌 Bulletproof IPC Dialog Handlers (Replaces buggy @electron/remote)
+// 🔌 Bulletproof IPC Dialog Handlers
 ipcMain.handle('dialog:showOpenDialog', async (event, options) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     return await dialog.showOpenDialog(win, options);

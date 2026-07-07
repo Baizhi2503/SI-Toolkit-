@@ -4,6 +4,7 @@ const path = require('path');
 const STORAGE_DIR = path.join(require('os').homedir(), '.si_toolkit');
 const DB_FILE = path.join(STORAGE_DIR, 'database.json');
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.bmp', '.gif']);
+const CURRENT_SCHEMA_VERSION = 1.0;
 
 const BASELINE_TEMPLATES = {
     victimDm: `# <:SI:1169019875814023178> Greetings,
@@ -39,8 +40,8 @@ Sincerely,
 
 On reviewing this case in depth, I have reached out with a final verdict:-
 
-**Suspect ([SUSPECT_USERNAME]): [S_REASON]**
-**Victim ([VICTIM_USERNAME]): [V_REASON]**
+**Suspect (SUSPECT_USERNAME): [S_REASON]**
+**Victim (VICTIM_USERNAME): [V_REASON]**
 **Evidence: [EVIDENCE]**
 
 [MESSAGE]
@@ -54,7 +55,8 @@ With regards,
 class StorageController {
     static defaultDb() {
         return {
-            investigatorProfile: { name: 'Baizhi', position: 'Scam Investigator', pfpBase64: '' },
+            dbVersion: CURRENT_SCHEMA_VERSION,
+            investigatorProfile: { name: '', position: 'Trial Scam Investigator', pfpBase64: '' },
             customTemplates: Object.assign({}, BASELINE_TEMPLATES),
             activeCases: [],
             finalizedCases: []
@@ -72,17 +74,40 @@ class StorageController {
 
     static normalizeDb(db) {
         const normalized = Object.assign(this.defaultDb(), db && typeof db === 'object' ? db : {});
+        
         normalized.investigatorProfile = Object.assign(
             this.defaultDb().investigatorProfile,
             normalized.investigatorProfile && typeof normalized.investigatorProfile === 'object' ? normalized.investigatorProfile : {}
         );
+        
         normalized.customTemplates = Object.assign(
             {},
             BASELINE_TEMPLATES,
             normalized.customTemplates && typeof normalized.customTemplates === 'object' ? normalized.customTemplates : {}
         );
+        
         normalized.activeCases = Array.isArray(normalized.activeCases) ? normalized.activeCases : [];
         normalized.finalizedCases = Array.isArray(normalized.finalizedCases) ? normalized.finalizedCases : [];
+
+        const deeplyNormalizeCases = (caseArray) => {
+            return caseArray.map(caseRecord => {
+                const baselineCase = Object.assign(new ScamCase(), caseRecord);
+                if (Array.isArray(baselineCase.suspects)) {
+                    baselineCase.suspects = baselineCase.suspects.map(suspect => {
+                        return Object.assign({ id: 1, name: "Suspect", discordIds: [], robloxIds: [] }, suspect);
+                    });
+                }
+                return baselineCase;
+            });
+        };
+
+        normalized.activeCases = deeplyNormalizeCases(normalized.activeCases);
+        normalized.finalizedCases = deeplyNormalizeCases(normalized.finalizedCases);
+
+        if (normalized.dbVersion < CURRENT_SCHEMA_VERSION) {
+            normalized.dbVersion = CURRENT_SCHEMA_VERSION;
+        }
+
         return normalized;
     }
 
@@ -93,12 +118,14 @@ class StorageController {
             let db = this.normalizeDb(JSON.parse(raw));
 
             let structureChanged = false;
+            
             Object.keys(BASELINE_TEMPLATES).forEach(key => {
-                if (!db.customTemplates[key] || db.customTemplates[key].trim() === "") {
+                if (!db.customTemplates[key] || db.customTemplates[key].includes('[TICKET_ID]') || !db.customTemplates[key].includes('Greetings,')) {
                     db.customTemplates[key] = BASELINE_TEMPLATES[key];
                     structureChanged = true;
                 }
             });
+            
             if (structureChanged) this.save(db);
             return db;
         } catch (e) {
@@ -112,10 +139,15 @@ class StorageController {
         try {
             this.init();
             const tmpFile = `${DB_FILE}.tmp`;
-            fs.writeFileSync(tmpFile, JSON.stringify(this.normalizeDb(data), null, 4));
+            const finalizedPayload = this.normalizeDb(data);
+            finalizedPayload.dbVersion = CURRENT_SCHEMA_VERSION;
+
+            fs.writeFileSync(tmpFile, JSON.stringify(finalizedPayload, null, 4));
             fs.renameSync(tmpFile, DB_FILE);
+            return true;
         } catch (e) {
-            console.error("AutoSave routine encountered a structural write error:", e);
+            console.error(e);
+            return false;
         }
     }
 }
@@ -124,7 +156,7 @@ class ScamCase {
     constructor(ticketId = null) {
         this.ticketId = ticketId || `case-${Date.now()}`;
         this.suspects = [{ id: 1, name: "Suspect #1", discordIds: [], robloxIds: [] }];
-        this.activeSuspectId = 1; 
+        this.activeSuspectId = 1;
         this.notes = '';
         this.currentStep = 1;
         this.evidenceVideoPath = '';
