@@ -1,9 +1,10 @@
 {
   "name": "si-toolkit",
-  "version": "1.1.1",
+  "version": "1.1.0",
+  "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron .",
+    "start": "cross-env TEST_MODE=false electron .",
+    "test-rookie": "cross-env TEST_MODE=true electron .",
     "dist": "electron-builder --win portable"
   },
   "keywords": [],
@@ -11,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "electron": "^42.5.2",
     "electron-builder": "^26.15.3"
   },

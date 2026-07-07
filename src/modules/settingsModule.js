@@ -136,6 +136,15 @@ class SettingsModule extends BaseModule {
     saveSettingsPayload() {
         const inputName = this.setProfileName.value.trim();
 
+        if (inputName === '') {
+            alert("❌ Set your profile first!!!!");
+            
+            if (this.settingsProfileNameInput) {
+                this.settingsProfileNameInput.focus();
+            }
+            return; 
+        }
+
         this.app.db.investigatorProfile.name = inputName;
         this.app.db.investigatorProfile.position = this.setProfilePos.value;
         this.app.db.investigatorProfile.pfpBase64 = this.temporaryPfpBase64;
@@ -144,10 +153,68 @@ class SettingsModule extends BaseModule {
         this.app.db.customTemplates.verdict = this.setTplVerdict.value;
         
         StorageController.save(this.app.db);
+        
+        // 2. Synchronize badge profile UI elements instantly
         if (typeof window.syncInvestigatorProfileUI === 'function') {
             window.syncInvestigatorProfileUI();
         }
+
+        // 3. Close the settings overlay panel display
         this.settingsScreen.style.display = 'none';
+
+        // 4. 🔥 LIVE DASHBOARD TRANSITION (No hard app reloads)
+        const onboardingCard = document.getElementById('onboardingCardView');
+        const coreDashboardWrapper = document.getElementById('dashboardCoreLayoutWrapper');
+        const profileBadge = document.getElementById('investigatorProfileBadge');
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const dashboardLayout = document.getElementById('portalDashboardLayout');
+        const newCaseBtn = document.getElementById('newCaseBtn');
+        const subHeader = document.querySelector('#welcomeScreen p');
+
+        // Check if we just finalized onboarding setup from an empty user state
+        if (inputName !== '') {
+            // Dismiss introduction splash dialog completely
+            if (onboardingCard) onboardingCard.style.display = 'none';
+            
+            // Bring forward full operational dashboard elements onto view screen
+            if (coreDashboardWrapper) coreDashboardWrapper.style.display = 'flex';
+            if (profileBadge) profileBadge.style.display = 'flex';
+            if (dashboardLayout) dashboardLayout.style.display = 'grid';
+            if (newCaseBtn) newCaseBtn.style.display = 'block';
+            
+            if (subHeader) {
+                subHeader.textContent = 'Ready to hunt down some scammers?';
+                subHeader.style.color = 'var(--text-muted)';
+            }
+
+            // Force dynamic case listings to evaluate data vectors safely without crashing
+            // Force dynamic case listings to evaluate data vectors safely without crashing
+            const pContainer = document.getElementById('pendingCasesContainer');
+            const fContainer = document.getElementById('finalizedCasesContainer');
+            
+            if (pContainer && fContainer) {
+                pContainer.innerHTML = '';
+                fContainer.innerHTML = '';
+                
+                if (this.app.db.activeCases.length === 0) {
+                    pContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; font-style: italic; background: #15151a; padding: 15px; border-radius: 6px; border: 1px dashed var(--border);">No active investigations found.</div>`;
+                    
+                    if (dashboardLayout && !document.getElementById('dashboardEmptyStateBanner')) {
+                        const emptyStateBanner = document.createElement('div');
+                        emptyStateBanner.id = 'dashboardEmptyStateBanner';
+                        emptyStateBanner.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 60px 20px; margin-top: 40px; background: rgba(30, 30, 40, 0.4); border: 1px solid var(--border); border-radius: 12px; font-family: monospace;';
+                        emptyStateBanner.innerHTML = `
+                            <h2 style="color: #ff4757; font-size: 20px; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 8px;">Ready to begin the hunt?</h2>
+                            <p style="color: #cbd5e1; font-size: 14px; font-weight: 600;">Click <span style="background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">New Case</span> to start hunting!!!</p>
+                        `;
+                        dashboardLayout.appendChild(emptyStateBanner);
+                    }
+                }
+                if (this.app.db.finalizedCases.length === 0) {
+                    fContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; font-style: italic; background: #15151a; padding: 15px; border-radius: 6px; border: 1px dashed var(--border);">No finalized logs discovered.</div>`;
+                }
+            }
+        }
     }
 }
 

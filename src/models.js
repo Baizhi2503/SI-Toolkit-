@@ -1,8 +1,12 @@
 const fs = require('fs');
 const path = require('path');
+const { ipcRenderer } = require('electron');
+
+const isTestModeActive = ipcRenderer.sendSync('check-test-mode');
 
 const STORAGE_DIR = path.join(require('os').homedir(), '.si_toolkit');
-const DB_FILE = path.join(STORAGE_DIR, 'database.json');
+const DB_FILE = path.join(STORAGE_DIR, isTestModeActive ? 'database.test.json' : 'database.json');
+
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.bmp', '.gif']);
 const CURRENT_SCHEMA_VERSION = 1.0;
 

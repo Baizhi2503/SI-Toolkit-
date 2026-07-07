@@ -70,6 +70,7 @@ function main() {
 
     let autoSaveTimeout = null;
 
+    // Secure UI sync parsing
     window.syncInvestigatorProfileUI = () => {
         const profile = app.db.investigatorProfile || {};
         const nameText = document.getElementById('badgeNameText');
@@ -303,22 +304,102 @@ function main() {
         app.db = StorageController.load(); 
         const pContainer = document.getElementById('pendingCasesContainer');
         const fContainer = document.getElementById('finalizedCasesContainer');
+        const dashboardLayout = document.getElementById('portalDashboardLayout');
+        const newCaseBtn = document.getElementById('newCaseBtn');
+        
+        // Dynamic View Panel Elements
+        const profileBadge = document.getElementById('investigatorProfileBadge');
+        const onboardingCard = document.getElementById('onboardingCardView');
+        const coreDashboardWrapper = document.getElementById('dashboardCoreLayoutWrapper');
+
         if (!pContainer || !fContainer) return;
         
         pContainer.innerHTML = ''; 
         fContainer.innerHTML = '';
         
-        if (app.db.activeCases.length === 0) {
-            pContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; font-style: italic; background: #15151a; padding: 15px; border-radius: 6px; border: 1px dashed var(--border);">No active investigations found.</div>`;
+        // Check if user has an empty investigator identity name setup
+        const isNewUser = !app.db.investigatorProfile.name || app.db.investigatorProfile.name.trim() === '';
+        
+        if (isNewUser) {
+            // State A: Hide standard dashboard spaces and strip profile badge access entirely
+            if (coreDashboardWrapper) coreDashboardWrapper.style.display = 'none';
+            if (profileBadge) profileBadge.style.display = 'none';
+            
+            // Render the centered welcome text splash card
+            if (onboardingCard) {
+                onboardingCard.style.display = 'flex';
+                
+                // Assign clean trigger handler onto the 'Proceed' element link
+                const proceedBtn = document.getElementById('onboardingProceedBtn');
+                if (proceedBtn) {
+                    proceedBtn.onclick = (e) => {
+                        e.preventDefault();
+                        // Instantly launch the Settings Overlay Module via global instance reference
+                        const settingsMod = app.getModule('SettingsManager');
+                        if (settingsMod && typeof settingsMod.launchSettingsOverlay === 'function') {
+                            settingsMod.launchSettingsOverlay();
+                        }
+                    };
+                }
+            }
         } else {
-            app.db.activeCases.forEach(item => pContainer.appendChild(buildDynamicPortalCaseCardElement(item, false)));
-        }
+            // State B: Show full operative interface space safely
+            if (onboardingCard) onboardingCard.style.display = 'none';
+            if (coreDashboardWrapper) coreDashboardWrapper.style.display = 'flex';
+            if (profileBadge) profileBadge.style.display = 'flex'; 
 
-        if (app.db.finalizedCases.length === 0) {
-            fContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; font-style: italic; background: #15151a; padding: 15px; border-radius: 6px; border: 1px dashed var(--border);">No finalized logs discovered.</div>`;
-        } else {
-            app.db.finalizedCases.forEach(item => fContainer.appendChild(buildDynamicPortalCaseCardElement(item, true)));
+            if (dashboardLayout) dashboardLayout.style.display = 'grid';
+            if (newCaseBtn) newCaseBtn.style.display = 'block';
+
+            if (app.db.activeCases.length === 0) {
+                pContainer.innerHTML = `
+                    <div style="color: var(--text-muted); font-size: 13px; font-style: italic; background: #15151a; padding: 15px; border-radius: 6px; border: 1px dashed var(--border);">
+                        No active investigations found.
+                    </div>
+                `;
+                
+                let emptyStateBanner = document.getElementById('dashboardEmptyStateBanner');
+                if (!emptyStateBanner) {
+                    emptyStateBanner = document.createElement('div');
+                    emptyStateBanner.id = 'dashboardEmptyStateBanner';
+                    emptyStateBanner.style.cssText = `
+                        grid-column: 1 / -1;
+                        text-align: center;
+                        padding: 60px 20px;
+                        margin-top: 40px;
+                        background: rgba(30, 30, 40, 0.4);
+                        border: 1px solid var(--border);
+                        border-radius: 12px;
+                        font-family: monospace;
+                    `;
+                    emptyStateBanner.innerHTML = `
+                        <h2 style="color: #ff4757; font-size: 20px; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 8px;">
+                            Ready to begin the hunt?
+                        </h2>
+                        <p style="color: #cbd5e1; font-size: 14px; font-weight: 600;">
+                            Click <span style="background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">New Case</span> to start hunting!!!
+                        </p>
+                    `;
+                    dashboardLayout.appendChild(emptyStateBanner);
+                } else {
+                    emptyStateBanner.style.display = 'block';
+                }
+            } else {
+                app.db.activeCases.forEach(item => pContainer.appendChild(buildDynamicPortalCaseCardElement(item, false)));
+                
+                const emptyStateBanner = document.getElementById('dashboardEmptyStateBanner');
+                if (emptyStateBanner) {
+                    emptyStateBanner.remove(); 
+                }
+            }
+
+            if (app.db.finalizedCases.length === 0) {
+                fContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; font-style: italic; background: #15151a; padding: 15px; border-radius: 6px; border: 1px dashed var(--border);">No finalized logs discovered.</div>`;
+            } else {
+                app.db.finalizedCases.forEach(item => fContainer.appendChild(buildDynamicPortalCaseCardElement(item, true)));
+            }
         }
+        
         window.syncInvestigatorProfileUI();
     }
 
