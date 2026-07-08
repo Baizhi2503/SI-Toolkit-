@@ -6,7 +6,7 @@
     <div style="width: 45%; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-right: 5px;">
         
         <div style="background: var(--bg-panel); border: 1px solid var(--border); padding: 18px; border-radius: 8px;">
-            <h4 style="margin: 0 0 12px 0; color: var(--accent); font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;">Template Picker & Inputs</h4>
+            <h4 style="margin: 0 0 12px 0; color: var(--theme-accent); font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;">Template Picker & Inputs</h4>
             
             <div class="form-group" style="margin-bottom: 12px;">
                 <label style="font-size: 10px;">Select Active Action Message Template</label>
@@ -17,11 +17,11 @@
                 </select>
             </div>
             
-            <button class="action-btn" id="copyCompiledMessageBtn" style="background: #341f97; width: 100%; padding: 12px; font-size: 13px; font-weight: bold; margin-top: 5px;">Copy Compiled Message</button>
+            <button class="action-btn" id="copyCompiledMessageBtn" style="background: var(--theme-gradient); width: 100%; padding: 12px; font-size: 13px; font-weight: bold; margin-top: 5px; box-shadow: 0 4px 10px var(--theme-glow);">Copy Compiled Message</button>
         </div>
 
         <div style="background: var(--bg-panel); border: 1px solid var(--border); padding: 18px; border-radius: 8px; display: flex; flex-direction: column; gap: 12px;">
-            <h4 style="margin: 0 0 4px 0; color: #ffa502; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;">Token Value Injectors</h4>
+            <h4 style="margin: 0 0 4px 0; color: var(--theme-accent); font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; opacity: 0.9;">Token Value Injectors</h4>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div class="form-group">
@@ -59,7 +59,7 @@
             <div class="form-group" id="evidenceFormGroup">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
                     <label style="font-size: 9px;">[EVIDENCE]</label>
-                    <span id="addEvidenceBtn" style="color: var(--accent); font-size: 10px; font-weight: bold; cursor: pointer; background: rgba(255, 71, 87, 0.1); padding: 3px 8px; border-radius: 4px; transition: opacity 0.2s;">+ ADD LINK</span>
+                    <span id="addEvidenceBtn" style="color: var(--theme-accent); font-size: 10px; font-weight: bold; cursor: pointer; background: var(--theme-glow); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--theme-border); transition: opacity 0.2s;">+ ADD LINK</span>
                 </div>
                 <div id="evidenceListContainer" style="display: flex; flex-direction: column; gap: 8px;">
                     <div class="evidence-row" style="display: flex; gap: 8px; align-items: center;">
@@ -81,11 +81,11 @@
         
         <div style="background: var(--bg-panel); border: 1px solid var(--border); padding: 18px; border-radius: 8px; flex: 1; display: flex; flex-direction: column; gap: 10px;">
             <h4 style="margin: 0; color: #fff; font-size: 14px; font-weight: bold;">Discord Output Live Preview</h4>
-            <textarea id="discordOutputLivePreview" readonly style="flex: 1; width: 100%; background: #0c0c10; border: 1px solid #2a2a38; border-radius: 6px; color: #2ed573; font-family: 'Consolas', monospace; font-size: 13px; padding: 15px; box-sizing: border-box; resize: none; line-height: 1.5; outline: none; border-left: 3px solid var(--accent);"></textarea>
+            <textarea id="discordOutputLivePreview" readonly style="flex: 1; width: 100%; background: #0c0c10; border: 1px solid #2a2a38; border-radius: 6px; color: #cbd5e1; font-family: 'Consolas', monospace; font-size: 13px; padding: 15px; box-sizing: border-box; resize: none; line-height: 1.5; outline: none; border-left: 3px solid var(--theme-accent);"></textarea>
         </div>
 
         <div style="background: var(--bg-panel); border: 1px solid var(--border); padding: 15px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px;">
-            <h4 style="margin: 0; color: #ffa502; font-size: 12px; font-weight: bold; font-family: monospace;">Scam Rules Quick-Copy (Click to copy text reason)</h4>
+            <h4 style="margin: 0; color: var(--theme-accent); font-size: 12px; font-weight: bold; font-family: monospace;">Scam Rules Quick-Copy (Click to copy text reason)</h4>
             
             <div style="display: flex; flex-direction: column; gap: 6px; max-height: 140px; overflow-y: auto;">
                 <div style="display: flex; justify-content: space-between; align-items: center; background: #111116; border: 1px solid var(--border); padding: 8px 12px; border-radius: 4px; font-size: 12px;">

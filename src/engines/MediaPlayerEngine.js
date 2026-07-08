@@ -10,7 +10,8 @@ class MediaPlayerEngine {
         this.originalImageState = null;
         this.undoStack = []; 
         this.redoStack = [];
-        this.currentBrushColor = '#ff4757';
+        
+        this.currentBrushColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim() || '#ff4757';
         this.currentBrushType = 'box';
         this.isDrawing = false;
         this.isPanning = false;
@@ -45,7 +46,11 @@ class MediaPlayerEngine {
         const getEl = id => document.getElementById(id);
         
         getEl('canvasHandBtn')?.addEventListener('click', () => { this.activeCanvasTool = 'hand'; this.updateToolUIState(); });
-        getEl('canvasRedBtn')?.addEventListener('click', () => { this.currentBrushColor = '#ff4757'; this.activeCanvasTool = 'box'; this.updateToolUIState(); });
+        getEl('canvasRedBtn')?.addEventListener('click', () => { 
+            this.currentBrushColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim();
+            this.activeCanvasTool = 'box'; 
+            this.updateToolUIState(); 
+        });
         getEl('canvasYellowBtn')?.addEventListener('click', () => { this.activeCanvasTool = 'highlight'; this.updateToolUIState(); });
         getEl('canvasUndoBtn')?.addEventListener('click', () => this.triggerUndoAction());
         getEl('canvasRedoBtn')?.addEventListener('click', () => this.triggerRedoAction());
@@ -123,7 +128,11 @@ class MediaPlayerEngine {
 
             if (this.annotationModal && this.annotationModal.style.display === 'flex') {
                 if (key === '1') { this.activeCanvasTool = 'hand'; this.updateToolUIState(); } 
-                else if (key === '2') { this.currentBrushColor = '#ff4757'; this.activeCanvasTool = 'box'; this.updateToolUIState(); } 
+                else if (key === '2') { 
+                    this.currentBrushColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim();
+                    this.activeCanvasTool = 'box'; 
+                    this.updateToolUIState(); 
+                } 
                 else if (key === '3') { this.activeCanvasTool = 'highlight'; this.updateToolUIState(); } 
                 else if (key === '4') { this.activeCanvasTool = 'crop'; this.updateToolUIState(); }
                 if (e.ctrlKey && key === 'z') { e.preventDefault(); this.triggerUndoAction(); }
@@ -178,7 +187,9 @@ class MediaPlayerEngine {
             if (this.isCropping) {
                 const coords = this.getCanvasMouseCoordinates(e);
                 this.cropCurrentX = coords.x; this.cropCurrentY = coords.y;
-                this.ctx.putImageData(this.originalImageState, 0, 0); this.ctx.strokeStyle = '#ffa502'; this.ctx.lineWidth = 2 / this.currentZoomScale;
+                this.ctx.putImageData(this.originalImageState, 0, 0); 
+                this.ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim() || '#ffa502'; 
+                this.ctx.lineWidth = 2 / this.currentZoomScale;
                 this.ctx.setLineDash([6, 4]); this.ctx.strokeRect(this.cropStartX, this.cropStartY, this.cropCurrentX - this.cropStartX, this.cropCurrentY - this.cropStartY);
                 this.ctx.setLineDash([]); return;
             }
@@ -269,7 +280,7 @@ class MediaPlayerEngine {
         currentCase.evidenceFrames.forEach((frameObj, index) => {
             const card = document.createElement('div');
             card.setAttribute('draggable', 'true');
-            card.style.cssText = `position: relative; min-width: 140px; max-width: 140px; height: 120px; background: #222; border: 2px solid #444; border-radius: 4px; overflow: hidden; display: flex; flex-direction: column; cursor: grab;`;
+            card.style.cssText = `position: relative; min-width: 140px; max-width: 140px; height: 120px; background: #222; border: 2px solid var(--border); border-radius: 4px; overflow: hidden; display: flex; flex-direction: column; cursor: grab; box-shadow: 0 2px 6px var(--theme-glow);`;
             
             const imgContainer = document.createElement('div');
             imgContainer.style.cssText = "width: 100%; height: 90px; position: relative; overflow: hidden;";
@@ -280,7 +291,7 @@ class MediaPlayerEngine {
             
             const timeBadge = document.createElement('div');
             timeBadge.textContent = `⏱️ ${frameObj.displayTime || '00:00'}`;
-            timeBadge.style.cssText = "position: absolute; bottom: 4px; left: 4px; background: rgba(12, 12, 16, 0.85); color: #ffa502; border: 1px solid rgba(255, 165, 2, 0.4); padding: 2px 5px; border-radius: 3px; font-family: monospace; font-size: 10px; font-weight: bold; cursor: pointer; z-index: 10; transition: transform 0.1s;";
+            timeBadge.style.cssText = "position: absolute; bottom: 4px; left: 4px; background: rgba(12, 12, 16, 0.85); color: var(--theme-accent); border: 1px solid var(--theme-border); padding: 2px 5px; border-radius: 3px; font-family: monospace; font-size: 10px; font-weight: bold; cursor: pointer; z-index: 10; transition: transform 0.1s; box-shadow: 0 2px 4px var(--theme-glow);";
             timeBadge.onclick = (e) => {
                 e.stopPropagation(); e.preventDefault();
                 if (this.videoPlayer && frameObj.timestamp !== undefined) {
@@ -296,17 +307,17 @@ class MediaPlayerEngine {
             imgContainer.onmouseleave = () => overlay.style.opacity = '0';
             
             const editBtn = document.createElement('button'); editBtn.innerHTML = '✏️';
-            editBtn.style.cssText = "background: #341f97; border: none; padding: 4px 8px; cursor: pointer;";
+            editBtn.style.cssText = "background: var(--theme-gradient); border: none; padding: 4px 8px; cursor: pointer; border-radius: 4px; box-shadow: 0 2px 4px var(--theme-glow);";
             editBtn.onclick = (e) => { e.stopPropagation(); this.launchAnnotationModal(index); };
             
             const trashBtn = document.createElement('button'); trashBtn.innerHTML = '🗑️';
-            trashBtn.style.cssText = "background: #ff4757; border: none; padding: 4px 8px; cursor: pointer;";
+            trashBtn.style.cssText = "background: #ff4757; border: none; padding: 4px 8px; cursor: pointer; border-radius: 4px;";
             trashBtn.onclick = (e) => { e.stopPropagation(); currentCase.evidenceFrames.splice(index, 1); this.triggerWorkspaceAutoSaveNotification(); this.renderGalleryTimeline(); };
             
             overlay.appendChild(editBtn); overlay.appendChild(trashBtn); imgContainer.appendChild(overlay);
             
             const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☰ Drag to Reorder';
-            dragHandle.style.cssText = `width: 100%; height: 30px; background: #2a2a2a; border-top: 1px solid #444; display: flex; justify-content: center; align-items: center; font-size: 11px; color: var(--text-muted); font-weight: bold;`;
+            dragHandle.style.cssText = `width: 100%; height: 30px; background: #2a2a2a; border-top: 1px solid var(--border); display: flex; justify-content: center; align-items: center; font-size: 11px; color: var(--text-muted); font-weight: bold;`;
             card.appendChild(imgContainer); card.appendChild(dragHandle);
 
             card.addEventListener('dragstart', () => { this.draggedIndex = index; card.style.opacity = '0.5'; });
@@ -354,10 +365,10 @@ class MediaPlayerEngine {
     updateToolUIState() {
         const getEl = id => document.getElementById(id);
         if(getEl('canvasHandBtn')) getEl('canvasHandBtn').style.background = this.activeCanvasTool === 'hand' ? '#2ed573' : '#747d8c';
-        if(getEl('canvasRedBtn')) getEl('canvasRedBtn').style.background = this.activeCanvasTool === 'box' ? '#ff4757' : '#747d8c';
+        if(getEl('canvasRedBtn')) getEl('canvasRedBtn').style.background = this.activeCanvasTool === 'box' ? 'var(--theme-accent)' : '#747d8c';
         if(getEl('canvasYellowBtn')) getEl('canvasYellowBtn').style.background = this.activeCanvasTool === 'highlight' ? '#ffa502' : '#747d8c';
         const cropBtn = getEl('canvasCropBtn');
-        if (cropBtn) { cropBtn.style.background = this.activeCanvasTool === 'crop' ? '#341f97' : '#747d8c'; }
+        if (cropBtn) { cropBtn.style.background = this.activeCanvasTool === 'crop' ? 'var(--theme-gradient)' : '#747d8c'; }
         if(this.canvasViewportContainer) this.canvasViewportContainer.style.cursor = this.activeCanvasTool === 'hand' ? 'grab' : (this.activeCanvasTool === 'crop' ? 'crosshair' : 'default');
     }
 

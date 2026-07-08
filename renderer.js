@@ -10,6 +10,7 @@ const NotesChecklistModule = require('./src/modules/notesChecklistModule');
 const SettingsModule = require('./src/modules/settingsModule');
 
 const { buildDynamicGroupContainerCard, attachCardGroupingDragListeners, checkAndDissolveGroup } = require('./src/components/DashboardHubComponent');
+const ThemeEngine = require('./src/engines/themeEngine');
 
 class InvestigationPortal {
     constructor() {
@@ -71,6 +72,9 @@ window.app = app;
 function main() {
     app.init(); 
 
+    const savedThemeId = (app.db.investigatorProfile && app.db.investigatorProfile.activeTheme) ? app.db.investigatorProfile.activeTheme : 'red';
+    ThemeEngine.applyTheme(savedThemeId);
+
     let autoSaveTimeout = null;
 
     window.syncInvestigatorProfileUI = () => {
@@ -129,9 +133,9 @@ function main() {
                 }
                 break;
             case 'error':
-                dot.style.background = "#ff4757";
+                dot.style.background = "var(--theme-accent)";
                 text.textContent = message || "Sync Error";
-                text.style.color = "#ff4757";
+                text.style.color = "var(--theme-accent)";
                 
                 dot.style.animation = "pulse-error 1s infinite alternate";
                 if (!document.getElementById('sync-error-style')) {
@@ -235,7 +239,7 @@ function main() {
                 let item = app.db.activeCases[i];
                 if (item.type === 'group') {
                     item.cases = item.cases.filter(child => child.ticketId !== activeCase.ticketId);
-                    checkAndDissolveGroup(app, i, false);
+                    checkAndDissolveGroup(app, i, false); 
                 } else if (item.ticketId === activeCase.ticketId) {
                     app.db.activeCases.splice(i, 1);
                 }
@@ -269,8 +273,8 @@ function main() {
         saveBtn.style.color = "#fff";
         setTimeout(() => {
             saveBtn.innerHTML = nativeLabelText;
-            saveBtn.style.background = "#ffa502";
-            saveBtn.style.color = "#141419";
+            saveBtn.style.background = "var(--theme-glow)";
+            saveBtn.style.color = "var(--theme-accent)";
         }, 1200);
     });
 
@@ -374,7 +378,7 @@ function main() {
         
         fContainer.innerHTML = '';
         pContainer.innerHTML = '';
-
+        
         pContainer.style.backgroundColor = "transparent";
         fContainer.style.backgroundColor = "transparent";
         
@@ -408,7 +412,7 @@ function main() {
 
             if (app.db.activeCases.length === 0) {
                 pContainer.innerHTML = `
-                    <div style="color: var(--text-muted); font-size: 13px; font-style: italic; background: #15151a; padding: 15px; border-radius: 6px; border: 1px dashed var(--border);">
+                    <div style="color: var(--text-muted); font-size: 13px; font-style: italic; background: var(--theme-panel-tint); padding: 15px; border-radius: 6px; border: 1px dashed var(--border);">
                         No active investigations found.
                     </div>
                 `;
@@ -422,17 +426,17 @@ function main() {
                         text-align: center;
                         padding: 60px 20px;
                         margin-top: 40px;
-                        background: rgba(30, 30, 40, 0.4);
+                        background: var(--theme-panel-tint);
                         border: 1px solid var(--border);
                         border-radius: 12px;
                         font-family: monospace;
                     `;
                     emptyStateBanner.innerHTML = `
-                        <h2 style="color: #ff4757; font-size: 20px; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 8px;">
+                        <h2 style="color: var(--theme-accent); font-size: 20px; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 8px;">
                             Ready to begin the hunt?
                         </h2>
-                        <p style="color: #cbd5e1; font-size: 14px; font-weight: 600;">
-                            Click <span style="background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">New Case</span> to start hunting!!!
+                        <p style="color: var(--theme-text-tint); font-size: 14px; font-weight: 600;">
+                            Click <span style="background: var(--theme-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-size: 12px; font-weight: bold;">New Case</span> to start hunting!!!
                         </p>
                     `;
                     dashboardLayout.appendChild(emptyStateBanner);
@@ -456,7 +460,7 @@ function main() {
             }
 
             if (app.db.finalizedCases.length === 0) {
-                fContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; font-style: italic; background: #15151a; padding: 15px; border-radius: 6px; border: 1px dashed var(--border);">No finalized logs discovered.</div>`;
+                fContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; font-style: italic; background: var(--theme-panel-tint); padding: 15px; border-radius: 6px; border: 1px dashed var(--border);">No finalized logs discovered.</div>`;
             } else {
                 app.db.finalizedCases.forEach((item, index) => {
                     if (item.type === 'group') {
@@ -481,7 +485,7 @@ function main() {
 
         zone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            zone.style.backgroundColor = isArchive ? "rgba(46, 213, 115, 0.03)" : "rgba(255, 165, 2, 0.03)";
+            zone.style.backgroundColor = isArchive ? "rgba(46, 213, 115, 0.03)" : "var(--theme-glow)";
             zone.style.borderRadius = "8px";
         });
 
@@ -524,14 +528,15 @@ function main() {
     function buildDynamicPortalCaseCardElement(c, isArchive = false, isGroupChild = false) {
         const card = document.createElement('div');
         
-        let borderColor = '#ffa502';
-        if (isArchive) borderColor = '#2ed573';
-        else if (isGroupChild) borderColor = '#ff4757'; 
+        let borderColor = 'var(--theme-accent)';
+        if (isArchive) borderColor = 'var(--theme-accent-dark)'; 
+        else if (isGroupChild) borderColor = 'var(--theme-accent)'; 
 
-        card.style.cssText = `background: var(--bg-panel); border: 1px solid ${borderColor}; padding: 15px; border-radius: 8px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; gap: 8px; position: relative;`;
+        // 🔥 Refactored: Swapped out hardcoded #1e1e28 surface canvas logic to dynamic panel colors
+        card.style.cssText = `background: var(--theme-panel-tint); border: 1px solid ${borderColor}; padding: 15px; border-radius: 8px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; gap: 8px; position: relative; box-shadow: 0 4px 12px var(--theme-glow); color: var(--theme-text-tint);`;
         
-        card.onmouseenter = () => { card.style.transform = 'translateY(-2px)'; card.style.boxShadow = `0 5px 15px rgba(0,0,0,0.4)`; };
-        card.onmouseleave = () => { card.style.transform = 'none'; card.style.boxShadow = 'none'; };
+        card.onmouseenter = () => { card.style.transform = 'translateY(-2px)'; card.style.boxShadow = `0 6px 18px var(--theme-glow)`; };
+        card.onmouseleave = () => { card.style.transform = 'none'; card.style.boxShadow = '0 4px 12px var(--theme-glow)'; };
 
         const suspectsArray = Array.isArray(c.suspects) ? c.suspects : [];
         const previewSuspect = suspectsArray[0] || { discordIds: [], robloxIds: [] };
@@ -544,14 +549,14 @@ function main() {
         
         let badgeHTML = '';
         if (isSyndicate) {
-            badgeHTML = `<span style="font-size: 10px; background: rgba(255, 71, 87, 0.2); color: #ff4757; padding: 3px 8px; border-radius: 4px; font-weight: 900; border: 1px solid rgba(255, 71, 87, 0.3);">SYNDICATE</span>`;
+            badgeHTML = `<span style="font-size: 10px; background: rgba(0, 0, 0, 0.25); color: var(--theme-accent-dark); padding: 3px 8px; border-radius: 4px; font-weight: 900; border: 1px solid var(--theme-accent-dark);">SYNDICATE</span>`;
         } else if (isArchive) {
-            badgeHTML = `<span style="font-size: 11px; background: rgba(46, 213, 115, 0.15); color: #2ed573; padding: 3px 8px; border-radius: 4px; font-weight: bold; border: 1px solid rgba(46, 213, 115, 0.3);">ARCHIVED</span>`;
+            badgeHTML = `<span style="font-size: 11px; background: var(--theme-glow); color: var(--theme-accent); padding: 3px 8px; border-radius: 4px; font-weight: bold; border: 1px solid var(--theme-border);">ARCHIVED</span>`;
         } else if (isGroupChild) {
             const badgeText = c.isFinalized ? 'DONE' : 'SERIAL';
-            const badgeBg = c.isFinalized ? 'rgba(255, 165, 2, 0.15)' : 'rgba(255, 71, 87, 0.15)';
-            const badgeColor = c.isFinalized ? '#ffa502' : '#ff4757';
-            const badgeBorder = c.isFinalized ? 'rgba(255, 165, 2, 0.4)' : 'rgba(255, 71, 87, 0.3)';
+            const badgeBg = c.isFinalized ? 'var(--theme-glow)' : 'rgba(0, 0, 0, 0.25)';
+            const badgeColor = c.isFinalized ? 'var(--theme-accent)' : 'var(--theme-accent-dark)';
+            const badgeBorder = c.isFinalized ? 'var(--theme-border)' : 'var(--theme-accent-dark)';
 
             badgeHTML = `
                 <div style="display: flex; gap: 6px; align-items: center;">
@@ -560,21 +565,22 @@ function main() {
                 </div>
             `;
         } else {
-            badgeHTML = `<span style="font-size: 11px; background: rgba(255, 165, 2, 0.15); color: #ffa502; padding: 3px 8px; border-radius: 4px; font-weight: bold;">EDITABLE</span>`;
+            badgeHTML = `<span style="font-size: 11px; background: var(--theme-glow); color: var(--theme-accent); padding: 3px 8px; border-radius: 4px; font-weight: bold; border: 1px solid var(--theme-border);">EDITABLE</span>`;
         }
 
-        const stepTagHTML = `<span style="font-size: 11px; background: rgba(52, 31, 151, 0.3); color: #9c88ff; border: 1px solid #6c5ce7; padding: 3px 8px; border-radius: 4px; font-weight: 800; font-family: monospace;">STEP ${c.currentStep || 1}</span>`;
+        const stepTagHTML = `<span style="font-size: 11px; background: var(--theme-glow); color: var(--theme-accent); border: 1px solid var(--theme-border); padding: 3px 8px; border-radius: 4px; font-weight: 800; font-family: monospace;">STEP ${c.currentStep || 1}</span>`;
 
+        // 🔥 Soft-tinted header text fields applied cleanly
         card.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a2a35; padding-bottom: 6px;">
-                <strong style="color: #fff; font-family: monospace; font-size: 14px;">📂 ${c.ticketId}</strong>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 6px;">
+                <strong style="color: var(--theme-text-tint); Hong-family: monospace; font-size: 14px;">📂 ${c.ticketId}</strong>
                 <div style="display: flex; gap: 6px; align-items: center;">${stepTagHTML}${badgeHTML}</div>
             </div>
             <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; font-size: 12px; line-height: 1.4;">
-                <span style="color: var(--text-muted);">Users (S1):</span> <span style="color: #cbd5e1; font-family: monospace;">${dStr}</span>
-                <span style="color: var(--text-muted);">Roblox (S1):</span> <span style="color: #cbd5e1; font-family: monospace;">${rStr}</span>
-                <span style="color: var(--text-muted);">Length:</span> <span style="color: #cbd5e1;">${c.banLength || 'NULL'}</span>
-                <span style="color: var(--text-muted);">Reason:</span> <span style="color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 280px;">${c.selectedRules?.join(' | ') || 'NULL'}</span>
+                <span style="color: var(--text-muted);">Users (S1):</span> <span style="color: var(--theme-text-tint); font-family: monospace;">${dStr}</span>
+                <span style="color: var(--text-muted);">Roblox (S1):</span> <span style="color: var(--theme-text-tint); font-family: monospace;">${rStr}</span>
+                <span style="color: var(--text-muted);">Length:</span> <span style="color: var(--theme-text-tint);">${c.banLength || 'NULL'}</span>
+                <span style="color: var(--text-muted);">Reason:</span> <span style="color: var(--theme-text-tint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 280px;">${c.selectedRules?.join(' | ') || 'NULL'}</span>
             </div>
         `;
 

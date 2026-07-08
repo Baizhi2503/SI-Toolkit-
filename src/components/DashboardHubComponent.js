@@ -25,24 +25,25 @@ function buildDynamicGroupContainerCard(groupObj, groupIndex, buildCardFn) {
     container.className = 'case-group-wrapper';
     container.id = groupObj.id;
     container.style.cssText = `
-        border: 2px solid #2ed573;
+        border: 2px solid var(--theme-accent);
         background: #111116;
         border-radius: 8px;
         margin-bottom: 15px;
         display: flex;
         flex-direction: column;
         overflow: hidden;
+        box-shadow: 0 4px 15px var(--theme-glow);
     `;
 
     container.innerHTML = `
         <div class="group-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; background: #161622; border-bottom: 1px solid #2a2a38; user-select: none;">
             <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
-                <button class="toggle-group-btn" style="background: transparent; border: none; color: #2ed573; cursor: pointer; font-size: 14px; padding: 0;">▼</button>
+                <button class="toggle-group-btn" style="background: transparent; border: none; color: var(--theme-accent); cursor: pointer; font-size: 14px; padding: 0;">▼</button>
                 <span class="group-editable-title" contenteditable="true" style="color: #70a1ff; font-weight: bold; font-family: monospace; font-size: 14px; border-bottom: 1px dashed rgba(112, 161, 255, 0.4); padding-bottom: 2px; cursor: text;">
                     ${groupObj.title}
                 </span>
             </div>
-            <div style="background: rgba(236, 204, 104, 0.15); color: #eccc68; border: 1px solid rgba(236, 204, 104, 0.4); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; font-family: monospace;">
+            <div style="background: var(--theme-glow); color: var(--theme-accent); border: 1px solid var(--theme-border); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; font-family: monospace;">
                 ${groupObj.cases.length} Cases Linked
             </div>
         </div>
@@ -145,7 +146,7 @@ function attachCardGroupingDragListeners(cardElement, ticketId) {
 
     cardElement.addEventListener('dragover', (e) => {
         e.preventDefault();
-        cardElement.style.border = '2px dashed #2ed573'; 
+        cardElement.style.border = '2px dashed var(--theme-accent)'; 
     });
 
     cardElement.addEventListener('dragleave', () => {

@@ -86,8 +86,11 @@ class IdTrackerModule extends BaseModule {
             
             const tabWrapper = document.createElement('div');
             tabWrapper.style.cssText = `
-                display: flex; align-items: center; background: ${isActive ? 'rgba(255, 71, 87, 0.15)' : '#1e1e28'};
-                border: 1px solid ${isActive ? '#ff4757' : '#2a2a38'}; border-radius: 4px; overflow: hidden;
+                display: flex; align-items: center; 
+                background: ${isActive ? 'var(--theme-glow)' : '#1e1e28'};
+                border: 1px solid ${isActive ? 'var(--theme-accent)' : '#2a2a38'}; 
+                border-radius: 4px; overflow: hidden;
+                box-shadow: ${isActive ? '0 2px 6px var(--theme-glow)' : 'none'};
             `;
 
             const selectorBtn = document.createElement('button');
@@ -108,8 +111,8 @@ class IdTrackerModule extends BaseModule {
                 const deleteBtn = document.createElement('button');
                 deleteBtn.innerHTML = '&times;';
                 deleteBtn.style.cssText = `
-                    background: none; border: none; border-left: 1px solid ${isActive ? '#ff4757' : '#2a2a38'};
-                    color: #ff4757; padding: 6px 8px; font-size: 14px; font-weight: bold; cursor: pointer;
+                    background: none; border: none; border-left: 1px solid ${isActive ? 'var(--theme-accent)' : '#2a2a38'};
+                    color: var(--theme-accent); padding: 6px 8px; font-size: 14px; font-weight: bold; cursor: pointer;
                 `;
                 deleteBtn.onclick = (e) => {
                     e.preventDefault();

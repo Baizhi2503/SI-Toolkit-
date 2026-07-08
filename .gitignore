@@ -5,7 +5,6 @@ node_modules/
 .si_toolkit/
 sandbox_database.json
 
-# 🎥 Video Evidence & Large Media Extensions
 *.mp4
 *.mkv
 *.avi

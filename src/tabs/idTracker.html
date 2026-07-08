@@ -1,4 +1,4 @@
-<h2>Suspect Identity Profiling</h2>
+<h2 style="color: var(--theme-text-tint); margin: 0 0 10px 0; font-size: 20px; font-family: monospace;">👤 Suspect Identity Profiling</h2>
 
 <div class="form-group">
     <label for="ticketIdInput">Ticket ID Reference</label>
@@ -8,9 +8,8 @@
 <div style="margin: 20px 0 15px 0;">
     <label style="display: block; margin-bottom: 8px;">Target Suspect Dossiers</label>
     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-        <div id="suspectProfileTabsContainer" style="display: flex; gap: 6px; flex-wrap: wrap;">
-            </div>
-        <button id="addNewSuspectProfileBtn" style="background: #23232e; border: 1px dashed #ffa502; color: #ffa502; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 12px; cursor: pointer; transition: all 0.2s;">
+        <div id="suspectProfileTabsContainer" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+        <button id="addNewSuspectProfileBtn" style="background: #23232e; border: 1px dashed var(--theme-accent); color: var(--theme-accent); padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 12px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 6px var(--theme-glow);">
             ➕ Add Additional Suspect Dossier
         </button>
     </div>
@@ -22,9 +21,9 @@
     <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">App auto-detects Discord IDs vs numeric Roblox accounts.</p>
 </div>
 
-<h3>Tracked Targets</h3>
-<h4>Discord Profiles</h4>
+<h3 style="font-family: monospace; margin: 15px 0 10px 0;">Tracked Targets</h3>
+<h4 style="font-family: monospace; margin-bottom: 5px;">Discord Profiles</h4>
 <div class="chip-container discord" id="discordChipsContainer"></div>
 
-<h4>Roblox Profiles</h4>
+<h4 style="font-family: monospace; margin-bottom: 5px;">Roblox Profiles</h4>
 <div class="chip-container roblox" id="robloxChipsContainer"></div>

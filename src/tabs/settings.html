@@ -11,7 +11,7 @@
         </ul>
 
         <div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px; padding-top: 15px; border-top: 1px solid var(--border);">
-            <button class="action-btn" id="closeSettingsBtn" style="background-color: #2ed573; width: 100%; padding: 12px; font-weight: bold; font-size: 13px; border: none; color: #fff; border-radius: 6px; cursor: pointer;">💾 Save & Exit</button>
+            <button class="action-btn" id="closeSettingsBtn" style="background: var(--theme-gradient); width: 100%; padding: 12px; font-weight: bold; font-size: 13px; border: none; color: #fff; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 10px var(--theme-glow);">💾 Save & Exit</button>
             <button class="action-btn" id="cancelSettingsBtn" style="background-color: #333; border: 1px solid #444; color: #fff; width: 100%; padding: 10px; font-weight: bold; font-size: 12px; border-radius: 6px; cursor: pointer;">❌ Cancel</button>
         </div>
     </div>
@@ -23,7 +23,7 @@
             <div style="background: var(--bg-panel); border: 1px solid var(--border); padding: 25px; border-radius: 8px; max-width: 700px; display: flex; flex-direction: column; gap: 18px; align-items: flex-start;">
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 5px;">
                     <label style="align-self: flex-start;">Investigator PFP Avatar</label>
-                    <div id="settingsPfpClickCircle" style="width: 80px; height: 80px; border-radius: 50%; background: #111116; border: 2px dashed var(--accent); display: flex; align-items: center; justify-content: center; cursor: pointer !important; overflow: hidden; font-size: 28px; position: relative;">
+                    <div id="settingsPfpClickCircle" style="width: 80px; height: 80px; border-radius: 50%; background: #111116; border: 2px dashed var(--theme-accent); display: flex; align-items: center; justify-content: center; cursor: pointer !important; overflow: hidden; font-size: 28px; position: relative;">
                         <div id="settingsPfpImage" style="width: 100%; height: 100%; background-size: cover; background-position: center; display: none;"></div>
                         <span id="settingsPfpPlaceholderEmoji">🕵️‍♂️</span>
                     </div>
@@ -64,34 +64,34 @@
                     </div>
 
                     <div style="flex: 1; background: #111116; border: 1px solid var(--border); padding: 12px 15px; border-radius: 6px; max-height: 130px; overflow-y: auto;">
-                        <label style="color: #ffa502; font-size: 10px; margin-bottom: 8px; display: block; letter-spacing: 0.5px;">📋 Token Glossary Guide (Case Sensitive)</label>
+                        <label style="color: var(--theme-accent); font-size: 10px; margin-bottom: 8px; display: block; letter-spacing: 0.5px;">📋 Token Glossary Guide (Case Sensitive)</label>
                         <div style="display: flex; flex-direction: column; gap: 6px; font-family: 'Consolas', monospace; font-size: 11px; color: #cbd5e1;">
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="color: #ff4757; background: rgba(255, 71, 87, 0.1); padding: 1px 6px; border-radius: 4px; min-width: 130px; text-align: center; display: inline-block;">[DATE]</span>
+                                <span style="color: var(--theme-accent); background: var(--theme-glow); border: 1px solid var(--theme-border); padding: 1px 6px; border-radius: 4px; min-width: 130px; text-align: center; display: inline-block;">[DATE]</span>
                                 <span style="color: #a4b0be;">- Date of when the ticket was opened</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="color: #2ed573; background: rgba(46, 213, 115, 0.1); padding: 1px 6px; border-radius: 4px; min-width: 130px; text-align: center; display: inline-block;">[VICTIM_USERNAME]</span>
+                                <span style="color: var(--theme-accent); background: var(--theme-glow); border: 1px solid var(--theme-border); padding: 1px 6px; border-radius: 4px; min-width: 130px; text-align: center; display: inline-block;">[VICTIM_USERNAME]</span>
                                 <span style="color: #a4b0be;">- Username of Victim</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="color: #2ed573; background: rgba(46, 213, 115, 0.1); padding: 1px 6px; border-radius: 4px; min-width: 130px; text-align: center; display: inline-block;">[SUSPECT_USERNAME]</span>
+                                <span style="color: var(--theme-accent); background: var(--theme-glow); border: 1px solid var(--theme-border); padding: 1px 6px; border-radius: 4px; min-width: 130px; text-align: center; display: inline-block;">[SUSPECT_USERNAME]</span>
                                 <span style="color: #a4b0be;">- Username of Suspect</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="color: #eccc68; background: rgba(236, 204, 104, 0.1); padding: 1px 6px; border-radius: 4px; min-width: 130px; text-align: center; display: inline-block;">[S_REASON]</span>
+                                <span style="color: var(--theme-accent); background: var(--theme-glow); border: 1px solid var(--theme-border); padding: 1px 6px; border-radius: 4px; min-width: 130px; text-align: center; display: inline-block;">[S_REASON]</span>
                                 <span style="color: #a4b0be;">- Reason for Suspect</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="color: #eccc68; background: rgba(236, 204, 104, 0.1); padding: 1px 6px; border-radius: 4px; min-width: 130px; text-align: center; display: inline-block;">[V_REASON]</span>
+                                <span style="color: var(--theme-accent); background: var(--theme-glow); border: 1px solid var(--theme-border); padding: 1px 6px; border-radius: 4px; min-width: 130px; text-align: center; display: inline-block;">[V_REASON]</span>
                                 <span style="color: #a4b0be;">- Reason for Victim</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="color: #70a1ff; background: rgba(112, 161, 255, 0.1); padding: 1px 6px; border-radius: 4px; min-width: 130px; text-align: center; display: inline-block;">[EVIDENCE]</span>
+                                <span style="color: var(--theme-accent); background: var(--theme-glow); border: 1px solid var(--theme-border); padding: 1px 6px; border-radius: 4px; min-width: 130px; text-align: center; display: inline-block;">[EVIDENCE]</span>
                                 <span style="color: #a4b0be;">- Array for adding up to 9 Evidence links</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="color: #9c88ff; background: rgba(156, 136, 255, 0.1); padding: 1px 6px; border-radius: 4px; min-width: 130px; text-align: center; display: inline-block;">[MESSAGE]</span>
+                                <span style="color: var(--theme-accent); background: var(--theme-glow); border: 1px solid var(--theme-border); padding: 1px 6px; border-radius: 4px; min-width: 130px; text-align: center; display: inline-block;">[MESSAGE]</span>
                                 <span style="color: #a4b0be;">- Message template</span>
                             </div>
                         </div>
@@ -100,18 +100,18 @@
 
                 <div style="flex: 1; display: flex; flex-direction: column; min-height: 200px; margin-top: 5px;">
                     <div id="settingsTplVictimWrapper" style="display: flex; flex-direction: column; flex: 1; gap: 6px;">
-                        <label style="color: #ff9f43; font-size: 11px;">Victim Video Request Notice Template String Markup</label>
-                        <textarea id="settingsTemplateVictimDm" style="flex: 1; width: 100%; font-family: 'Consolas', monospace; font-size: 13px; background: #0c0c10; color: #2ed573; resize: none; padding: 15px; border: 1px solid var(--border); line-height: 1.5;"></textarea>
+                        <label style="color: var(--theme-accent); font-size: 11px;">Victim Video Request Notice Template String Markup</label>
+                        <textarea id="settingsTemplateVictimDm" style="flex: 1; width: 100%; font-family: 'Consolas', monospace; font-size: 13px; background: #0c0c10; color: #cbd5e1; resize: none; padding: 15px; border: 1px solid var(--border); line-height: 1.5;"></textarea>
                     </div>
 
                     <div id="settingsTplSuspectWrapper" style="display: none; flex-direction: column; flex: 1; gap: 6px;">
-                        <label style="color: #ff9f43; font-size: 11px;">Suspect Case Defend Notification Template String Markup</label>
-                        <textarea id="settingsTemplateSuspectDm" style="flex: 1; width: 100%; font-family: 'Consolas', monospace; font-size: 13px; background: #0c0c10; color: #2ed573; resize: none; padding: 15px; border: 1px solid var(--border); line-height: 1.5;"></textarea>
+                        <label style="color: var(--theme-accent); font-size: 11px;">Suspect Case Defend Notification Template String Markup</label>
+                        <textarea id="settingsTemplateSuspectDm" style="flex: 1; width: 100%; font-family: 'Consolas', monospace; font-size: 13px; background: #0c0c10; color: #cbd5e1; resize: none; padding: 15px; border: 1px solid var(--border); line-height: 1.5;"></textarea>
                     </div>
 
                     <div id="settingsTplVerdictWrapper" style="display: none; flex-direction: column; flex: 1; gap: 6px;">
-                        <label style="color: #ff9f43; font-size: 11px;">Verdict Case Conclusion Summary Template String Markup</label>
-                        <textarea id="settingsTemplateVerdict" style="flex: 1; width: 100%; font-family: 'Consolas', monospace; font-size: 13px; background: #0c0c10; color: #2ed573; resize: none; padding: 15px; border: 1px solid var(--border); line-height: 1.5;"></textarea>
+                        <label style="color: var(--theme-accent); font-size: 11px;">Verdict Case Conclusion Summary Template String Markup</label>
+                        <textarea id="settingsTemplateVerdict" style="flex: 1; width: 100%; font-family: 'Consolas', monospace; font-size: 13px; background: #0c0c10; color: #cbd5e1; resize: none; padding: 15px; border: 1px solid var(--border); line-height: 1.5;"></textarea>
                     </div>
                 </div>
             </div>

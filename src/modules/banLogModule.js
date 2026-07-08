@@ -61,10 +61,14 @@ class BanLogModule extends BaseModule {
                 
                 const originalText = this.copyBtn.textContent;
                 this.copyBtn.textContent = "✅ Copied This Command Segment!";
-                this.copyBtn.style.backgroundColor = "#2ed573";
+                this.copyBtn.style.background = "var(--theme-glow)";
+                this.copyBtn.style.color = "var(--theme-accent)";
+                this.copyBtn.style.border = "1px solid var(--theme-border)";
                 setTimeout(() => {
                     this.copyBtn.textContent = originalText;
-                    this.copyBtn.style.backgroundColor = "#ff4757";
+                    this.copyBtn.style.background = "var(--theme-gradient)";
+                    this.copyBtn.style.color = "#fff";
+                    this.copyBtn.style.border = "none";
                 }, 1200);
             });
         }

@@ -1,38 +1,38 @@
-<h2>Evidence Reordering & Video Processing Engine</h2>
+<h2 style="color: var(--theme-text-tint); margin: 0 0 10px 0; font-size: 20px; font-family: monospace;">🎬 Evidence Reordering & Video Processing Engine</h2>
 
-<div class="evidence-panel-card" style="background: var(--bg-panel); border: 1px solid var(--border); padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px;">
+<div class="evidence-panel-card" style="background: var(--bg-panel); border: 1px solid var(--border); padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 4px 12px var(--theme-glow);">
     <div>
-        <h4 style="color: #ff4757; margin: 0 0 5px 0; font-size: 15px; font-family: monospace;">🎥 Native Video Reverser Engine</h4>
+        <h4 style="color: var(--theme-accent); margin: 0 0 5px 0; font-size: 15px; font-family: monospace;">🎥 Native Video Reverser Engine</h4>
         <p style="color: var(--text-muted); margin: 0; font-size: 12px;">Reverse both video frames and audio tracks natively without freezing your Electron renderer thread.</p>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 12px; background: #111116; padding: 15px; border-radius: 6px; border: 1px solid #2a2a38;">
+    <div style="display: flex; flex-direction: column; gap: 12px; background: #111116; padding: 15px; border-radius: 6px; border: 1px solid var(--border);">
         <div style="display: flex; align-items: center; gap: 15px;">
-            <button class="action-btn" id="selectInputVideoBtn" style="background: #341f97; font-size: 12px; padding: 6px 14px; min-width: 140px; white-space: nowrap;">Select Video File</button>
+            <button class="action-btn" id="selectInputVideoBtn" style="background: var(--theme-gradient); font-size: 12px; padding: 6px 14px; min-width: 140px; white-space: nowrap;">Select Video File</button>
             <span id="inputVideoPathDisplay" style="color: var(--text-muted); font-family: monospace; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">No source file imported...</span>
         </div>
 
         <div style="display: flex; align-items: center; gap: 15px;">
-            <button class="action-btn" id="selectOutputVideoBtn" style="background: #341f97; font-size: 12px; padding: 6px 14px; min-width: 140px; white-space: nowrap;">Export Destination</button>
+            <button class="action-btn" id="selectOutputVideoBtn" style="background: var(--theme-gradient); font-size: 12px; padding: 6px 14px; min-width: 140px; white-space: nowrap;">Export Destination</button>
             <span id="outputVideoPathDisplay" style="color: var(--text-muted); font-family: monospace; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">No save location allocated...</span>
         </div>
     </div>
 
     <div style="display: flex; align-items: center; justify-content: space-between;">
-        <button class="action-btn" id="executeVideoReverseBtn" style="background: #ff4757; font-weight: bold; padding: 8px 18px; font-size: 13px;" disabled>Begin Video Reverse</button>
+        <button class="action-btn" id="executeVideoReverseBtn" style="background: var(--theme-gradient); font-weight: bold; padding: 8px 18px; font-size: 13px;" disabled>Begin Video Reverse</button>
         
-        <div id="videoProcessingLoader" style="display: none; align-items: center; gap: 10px; font-family: monospace; font-size: 12px; color: #ffa502;">
-            <span class="spinner-loader" style="display: inline-block; width: 12px; height: 12px; border: 2px solid #ffa502; border-radius: 50%; border-top-color: transparent; animation: spin 0.8s linear infinite;"></span>
+        <div id="videoProcessingLoader" style="display: none; align-items: center; gap: 10px; font-family: monospace; font-size: 12px; color: var(--theme-accent);">
+            <span class="spinner-loader" style="display: inline-block; width: 12px; height: 12px; border: 2px solid var(--theme-accent); border-radius: 50%; border-top-color: transparent; animation: spin 0.8s linear infinite;"></span>
             <span>FFmpeg rewriting tracks... Please wait...</span>
         </div>
     </div>
 </div>
 
 <div style="background: var(--bg-panel); border: 1px solid var(--border); padding: 20px; border-radius: 8px;">
-    <h4 style="margin: 0 0 10px 0; color: var(--accent);">Media Player Helper</h4>
+    <h4 style="margin: 0 0 10px 0; color: var(--theme-accent); font-family: monospace;">Media Player Helper</h4>
     <div style="display: flex; gap: 15px; margin-bottom: 15px;">
         <input type="text" id="videoPathDisplay" placeholder="No evidence video loaded..." readonly style="flex: 1;">
-        <button class="action-btn" id="selectVideoBtn" style="background-color: #341f97; white-space: nowrap;">Load Video</button>
+        <button class="action-btn" id="selectVideoBtn" style="background: var(--theme-gradient); white-space: nowrap;">Load Video</button>
     </div>
     
     <video id="evidenceVideoPlayer" controls style="width: 100%; border-radius: 6px; background: #000; max-height: 360px; display: none;"></video>
@@ -41,33 +41,33 @@
     </p>
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin: 25px 0 10px 0; border-top: 1px solid var(--border); padding-top: 15px;">
-        <h4 style="margin: 0; color: var(--text-main);">Captured Case Frames Timeline</h4>
-        <button class="action-btn" id="exportGalleryBtn" style="background-color: #ff9f43; padding: 6px 14px; font-size: 13px;">Export Gallery to Folder</button>
+        <h4 style="margin: 0; color: var(--text-main); font-family: monospace;">Captured Case Frames Timeline</h4>
+        <button class="action-btn" id="exportGalleryBtn" style="background: var(--theme-gradient); padding: 6px 14px; font-size: 13px;">Export Gallery to Folder</button>
     </div>
     
     <div id="evidenceGalleryTimeline" style="display: flex; gap: 12px; overflow-x: auto; padding: 15px 10px; min-height: 110px; background: #111; border-radius: 6px; border: 1px solid var(--border);"></div>
 </div>
 
 <div id="annotationModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000;">
-    <div style="background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; width: 90%; max-width: 1100px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: flex; flex-direction: column; max-height: 90vh;">
+    <div style="background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; width: 90%; max-width: 1100px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px var(--theme-glow); display: flex; flex-direction: column; max-height: 90vh;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-            <h3 style="margin: 0; color: var(--accent);">Target Review Annotation Canvas</h3>
+            <h3 style="margin: 0; color: var(--theme-accent); font-family: monospace;">Target Review Annotation Canvas</h3>
             
             <div style="display: flex; align-items: center; gap: 10px; background: #111116; padding: 5px 15px; border-radius: 4px; border: 1px solid var(--border);">
-                <span style="font-size: 12px; color: var(--text-muted);">🔍 Zoom:</span>
+                <span style="font-size: 12px; color: var(--text-muted); font-family: monospace;">🔍 Zoom:</span>
                 <input type="range" id="canvasZoomSlider" min="0.5" max="4" step="0.1" value="1" style="width: 100px; margin: 0; cursor: pointer;">
-                <span id="zoomPercentDisplay" style="font-size: 12px; font-weight: bold; min-width: 35px;">100%</span>
+                <span id="zoomPercentDisplay" style="font-size: 12px; font-weight: bold; min-width: 35px; font-family: monospace;">100%</span>
             </div>
 
             <div style="display: flex; gap: 10px; align-items: center;">
-                <button class="action-btn" id="canvasHandBtn" style="background: #2ed573; padding: 8px 14px;">Hand Tool (1)</button>
-                <button class="action-btn" id="canvasRedBtn" style="background: #ff4757; padding: 8px 14px;">Solid Block (2)</button>
-                <button class="action-btn" id="canvasYellowBtn" style="background: #ffa502; padding: 8px 14px;">Highlight (3)</button>
-                <button class="action-btn" id="canvasCropBtn" style="background: #747d8c; padding: 8px 14px;">Crop (4)</button>
-                <button class="action-btn" id="canvasUndoBtn" style="background: #57606f; padding: 8px 14px;">(↩) Undo</button>
-                <button class="action-btn" id="canvasRedoBtn" style="background: #57606f; padding: 8px 14px;">(↪) Redo</button>
-                <button class="action-btn" id="canvasCancelBtn" style="background: #ff4757; padding: 8px 14px; font-weight: bold;">Cancel</button>
-                <button class="action-btn" id="canvasSaveBtn" style="background: #2ed573; padding: 8px 14px; font-weight: bold;">Done</button>
+                <button class="action-btn" id="canvasHandBtn" style="background: #2ed573; padding: 8px 14px; font-family: monospace;">Hand Tool (1)</button>
+                <button class="action-btn" id="canvasRedBtn" style="background: var(--theme-gradient); padding: 8px 14px; font-family: monospace;">Solid Block (2)</button>
+                <button class="action-btn" id="canvasYellowBtn" style="background: #ffa502; padding: 8px 14px; font-family: monospace;">Highlight (3)</button>
+                <button class="action-btn" id="canvasCropBtn" style="background: #747d8c; padding: 8px 14px; font-family: monospace;">Crop (4)</button>
+                <button class="action-btn" id="canvasUndoBtn" style="background: #57606f; padding: 8px 14px; font-family: monospace;">(↩) Undo</button>
+                <button class="action-btn" id="canvasRedoBtn" style="background: #57606f; padding: 8px 14px; font-family: monospace;">(↪) Redo</button>
+                <button class="action-btn" id="canvasCancelBtn" style="background: #ff4757; padding: 8px 14px; font-weight: bold; font-family: monospace;">Cancel</button>
+                <button class="action-btn" id="canvasSaveBtn" style="background: #2ed573; padding: 8px 14px; font-weight: bold; font-family: monospace;">Done</button>
             </div>
         </div>
         
