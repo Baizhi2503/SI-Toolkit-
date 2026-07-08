@@ -1,5 +1,7 @@
 dist/
 
+build-dist/
+
 node_modules/
 
 .si_toolkit/
