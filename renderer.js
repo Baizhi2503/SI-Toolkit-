@@ -9,6 +9,8 @@ const BanLogModule = require('./src/modules/banLogModule');
 const NotesChecklistModule = require('./src/modules/notesChecklistModule');
 const SettingsModule = require('./src/modules/settingsModule');
 
+const { buildDynamicGroupContainerCard, attachCardGroupingDragListeners, checkAndDissolveGroup } = require('./src/components/DashboardHubComponent');
+
 class InvestigationPortal {
     constructor() {
         this.db = null; 
@@ -64,6 +66,7 @@ class InvestigationPortal {
 }
 
 const app = new InvestigationPortal();
+window.app = app; 
 
 function main() {
     app.init(); 
@@ -174,10 +177,25 @@ function main() {
         currentCase.selectedRules = activelyCheckedReasons;
 
         const lookupId = UI.sidebarCaseId ? UI.sidebarCaseId.textContent : currentCase.ticketId;
-        const idx = app.db.activeCases.findIndex(c => c.ticketId === currentCase.ticketId || c.ticketId === lookupId);
         
-        if (idx !== -1) {
-            app.db.activeCases[idx] = currentCase;
+        let savedSuccessfully = false;
+        for (let i = 0; i < app.db.activeCases.length; i++) {
+            let item = app.db.activeCases[i];
+            if (item.type === 'group') {
+                let innerIdx = item.cases.findIndex(c => c.ticketId === currentCase.ticketId || c.ticketId === lookupId);
+                if (innerIdx !== -1) {
+                    item.cases[innerIdx] = currentCase;
+                    savedSuccessfully = true;
+                    break;
+                }
+            } else if (item.ticketId === currentCase.ticketId || item.ticketId === lookupId) {
+                app.db.activeCases[i] = currentCase;
+                savedSuccessfully = true;
+                break;
+            }
+        }
+
+        if (savedSuccessfully) {
             StorageController.save(app.db);
             updateSyncUIIndicator('success');
         } else {
@@ -212,8 +230,27 @@ function main() {
         if (!activeCase) return;
 
         if (confirm(`⚠️ CRITICAL WARNING:\nAre you absolutely certain you want to permanently delete Case Workspace [ ${activeCase.ticketId} ]?`)) {
-            app.db.activeCases = app.db.activeCases.filter(c => c.ticketId !== activeCase.ticketId);
-            app.db.finalizedCases = app.db.finalizedCases.filter(c => c.ticketId !== activeCase.ticketId);
+            
+            for (let i = app.db.activeCases.length - 1; i >= 0; i--) {
+                let item = app.db.activeCases[i];
+                if (item.type === 'group') {
+                    item.cases = item.cases.filter(child => child.ticketId !== activeCase.ticketId);
+                    checkAndDissolveGroup(app, i, false);
+                } else if (item.ticketId === activeCase.ticketId) {
+                    app.db.activeCases.splice(i, 1);
+                }
+            }
+
+            for (let i = app.db.finalizedCases.length - 1; i >= 0; i--) {
+                let item = app.db.finalizedCases[i];
+                if (item.type === 'group') {
+                    item.cases = item.cases.filter(child => child.ticketId !== activeCase.ticketId);
+                    checkAndDissolveGroup(app, i, true);
+                } else if (item.ticketId === activeCase.ticketId) {
+                    app.db.finalizedCases.splice(i, 1);
+                }
+            }
+
             StorageController.save(app.db);
             app.setCurrentCase(null);
             renderPortalDashboardHub();
@@ -244,9 +281,32 @@ function main() {
 
         if (confirm(`Are you ready to finalize Case ${activeCase.ticketId}?`)) {
             window.triggerSilentWorkspaceAutoSave();
-            app.db.activeCases = app.db.activeCases.filter(c => c.ticketId !== activeCase.ticketId);
-            activeCase.isFinalized = true;
-            app.db.finalizedCases.push(activeCase);
+
+            let parentGroupIdx = app.db.activeCases.findIndex(item => 
+                item.type === 'group' && item.cases.some(c => c.ticketId === activeCase.ticketId)
+            );
+
+            if (parentGroupIdx !== -1) {
+                const group = app.db.activeCases[parentGroupIdx];
+                const targetCaseInGroup = group.cases.find(c => c.ticketId === activeCase.ticketId);
+                
+                if (targetCaseInGroup) targetCaseInGroup.isFinalized = true;
+                const allCasesDone = group.cases.every(c => c.isFinalized);
+
+                if (allCasesDone) {
+                    app.db.activeCases.splice(parentGroupIdx, 1);
+                    group.isFinalized = true; 
+                    app.db.finalizedCases.push(group);
+                    alert(`🔥 Serial suspects sweep complete! Entire group [ ${group.title} ] migrated to Finalized logs.`);
+                } else {
+                    alert(`🏁 Card marked [DONE]! Sibling tickets are still pending under this group stack.`);
+                }
+            } else {
+                app.db.activeCases = app.db.activeCases.filter(c => c.ticketId !== activeCase.ticketId);
+                activeCase.isFinalized = true;
+                app.db.finalizedCases.push(activeCase);
+            }
+
             StorageController.save(app.db);
             app.setCurrentCase(null);
             renderPortalDashboardHub();
@@ -299,7 +359,7 @@ function main() {
         if (UI.welcomeScreen) UI.welcomeScreen.style.display = 'none';
     }
 
-    function renderPortalDashboardHub() {
+    window.renderPortalDashboardHub = function() {
         app.db = StorageController.load(); 
         const pContainer = document.getElementById('pendingCasesContainer');
         const fContainer = document.getElementById('finalizedCasesContainer');
@@ -312,8 +372,11 @@ function main() {
 
         if (!pContainer || !fContainer) return;
         
-        pContainer.innerHTML = ''; 
         fContainer.innerHTML = '';
+        pContainer.innerHTML = '';
+
+        pContainer.style.backgroundColor = "transparent";
+        fContainer.style.backgroundColor = "transparent";
         
         const isNewUser = !app.db.investigatorProfile.name || app.db.investigatorProfile.name.trim() === '';
         
@@ -377,27 +440,95 @@ function main() {
                     emptyStateBanner.style.display = 'block';
                 }
             } else {
-                app.db.activeCases.forEach(item => pContainer.appendChild(buildDynamicPortalCaseCardElement(item, false)));
-                
                 const emptyStateBanner = document.getElementById('dashboardEmptyStateBanner');
-                if (emptyStateBanner) {
-                    emptyStateBanner.remove(); 
-                }
+                if (emptyStateBanner) emptyStateBanner.remove();
+
+                app.db.activeCases.forEach((item, index) => {
+                    if (item.type === 'group') {
+                        const groupCard = buildDynamicGroupContainerCard(item, index, buildDynamicPortalCaseCardElement);
+                        pContainer.appendChild(groupCard);
+                    } else {
+                        const card = buildDynamicPortalCaseCardElement(item, false, false);
+                        attachCardGroupingDragListeners(card, item.ticketId);
+                        pContainer.appendChild(card);
+                    }
+                });
             }
 
             if (app.db.finalizedCases.length === 0) {
                 fContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; font-style: italic; background: #15151a; padding: 15px; border-radius: 6px; border: 1px dashed var(--border);">No finalized logs discovered.</div>`;
             } else {
-                app.db.finalizedCases.forEach(item => fContainer.appendChild(buildDynamicPortalCaseCardElement(item, true)));
+                app.db.finalizedCases.forEach((item, index) => {
+                    if (item.type === 'group') {
+                        const groupCard = buildDynamicGroupContainerCard(item, index, buildDynamicPortalCaseCardElement);
+                        fContainer.appendChild(groupCard);
+                    } else {
+                        fContainer.appendChild(buildDynamicPortalCaseCardElement(item, true, false));
+                    }
+                });
             }
         }
         
         window.syncInvestigatorProfileUI();
-    }
+    };
 
-    function buildDynamicPortalCaseCardElement(c, isArchive = false) {
+    const makeRootContainerZoneDropable = (elementId, isArchive) => {
+        const zone = document.getElementById(elementId);
+        if (!zone) return;
+
+        zone.style.minHeight = "400px";
+        zone.style.transition = "background-color 0.2s ease, border-color 0.2s ease";
+
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            zone.style.backgroundColor = isArchive ? "rgba(46, 213, 115, 0.03)" : "rgba(255, 165, 2, 0.03)";
+            zone.style.borderRadius = "8px";
+        });
+
+        zone.addEventListener('dragleave', () => {
+            zone.style.backgroundColor = "transparent";
+        });
+
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.style.backgroundColor = "transparent";
+            
+            const draggedId = e.dataTransfer.getData('text/plain');
+            const sourceGroupId = e.dataTransfer.getData('source-parent-group');
+
+            if (!draggedId || !sourceGroupId || isArchive) return;
+
+            const listTarget = app.db.activeCases;
+            const groupIdx = listTarget.findIndex(g => g.id === sourceGroupId);
+
+            if (groupIdx !== -1) {
+                const group = listTarget[groupIdx];
+                const caseIdx = group.cases.findIndex(c => c.ticketId === draggedId);
+                
+                if (caseIdx !== -1) {
+                    const caseObj = group.cases.splice(caseIdx, 1)[0];
+                    caseObj.isFinalized = false;
+                    listTarget.push(caseObj);
+                    
+                    checkAndDissolveGroup(app, groupIdx, false);
+                    StorageController.save(app.db);
+                    renderPortalDashboardHub();
+                }
+            }
+        });
+    };
+
+    makeRootContainerZoneDropable('pendingCasesContainer', false);
+    makeRootContainerZoneDropable('finalizedCasesContainer', true);
+
+    function buildDynamicPortalCaseCardElement(c, isArchive = false, isGroupChild = false) {
         const card = document.createElement('div');
-        card.style.cssText = `background: var(--bg-panel); border: 1px solid ${isArchive ? '#2ed573' : '#ffa502'}; padding: 15px; border-radius: 8px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; gap: 8px; position: relative;`;
+        
+        let borderColor = '#ffa502';
+        if (isArchive) borderColor = '#2ed573';
+        else if (isGroupChild) borderColor = '#ff4757'; 
+
+        card.style.cssText = `background: var(--bg-panel); border: 1px solid ${borderColor}; padding: 15px; border-radius: 8px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; gap: 8px; position: relative;`;
         
         card.onmouseenter = () => { card.style.transform = 'translateY(-2px)'; card.style.boxShadow = `0 5px 15px rgba(0,0,0,0.4)`; };
         card.onmouseleave = () => { card.style.transform = 'none'; card.style.boxShadow = 'none'; };
@@ -410,9 +541,27 @@ function main() {
         const rStr = robList.length > 0 ? robList.slice(0, 5).join(', ') : 'NULL';
 
         const isSyndicate = suspectsArray.length > 1;
-        const badgeHTML = isSyndicate
-            ? `<span style="font-size: 10px; background: rgba(255, 71, 87, 0.2); color: #ff4757; padding: 3px 8px; border-radius: 4px; font-weight: 900; border: 1px solid rgba(255, 71, 87, 0.3);">SYNDICATE</span>`
-            : `<span style="font-size: 11px; background: ${isArchive ? 'rgba(46,213,115,0.15)' : 'rgba(255,165,2,0.15)'}; color: ${isArchive ? '#2ed573' : '#ffa502'}; padding: 3px 8px; border-radius: 4px; font-weight: bold;">${isArchive ? 'ARCHIVE' : 'EDITABLE'}</span>`;
+        
+        let badgeHTML = '';
+        if (isSyndicate) {
+            badgeHTML = `<span style="font-size: 10px; background: rgba(255, 71, 87, 0.2); color: #ff4757; padding: 3px 8px; border-radius: 4px; font-weight: 900; border: 1px solid rgba(255, 71, 87, 0.3);">SYNDICATE</span>`;
+        } else if (isArchive) {
+            badgeHTML = `<span style="font-size: 11px; background: rgba(46, 213, 115, 0.15); color: #2ed573; padding: 3px 8px; border-radius: 4px; font-weight: bold; border: 1px solid rgba(46, 213, 115, 0.3);">ARCHIVED</span>`;
+        } else if (isGroupChild) {
+            const badgeText = c.isFinalized ? 'DONE' : 'SERIAL';
+            const badgeBg = c.isFinalized ? 'rgba(255, 165, 2, 0.15)' : 'rgba(255, 71, 87, 0.15)';
+            const badgeColor = c.isFinalized ? '#ffa502' : '#ff4757';
+            const badgeBorder = c.isFinalized ? 'rgba(255, 165, 2, 0.4)' : 'rgba(255, 71, 87, 0.3)';
+
+            badgeHTML = `
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <span style="font-size: 11px; background: ${badgeBg}; color: ${badgeColor}; padding: 3px 8px; border-radius: 4px; font-weight: bold; border: 1px solid ${badgeBorder};">${badgeText}</span>
+                    <button class="breakout-case-btn" title="Remove from Group" style="background: #222; border: 1px solid var(--border); color: #70a1ff; cursor: pointer; padding: 2px 6px; border-radius: 4px; font-size: 11px; transition: background 0.2s;">📤</button>
+                </div>
+            `;
+        } else {
+            badgeHTML = `<span style="font-size: 11px; background: rgba(255, 165, 2, 0.15); color: #ffa502; padding: 3px 8px; border-radius: 4px; font-weight: bold;">EDITABLE</span>`;
+        }
 
         const stepTagHTML = `<span style="font-size: 11px; background: rgba(52, 31, 151, 0.3); color: #9c88ff; border: 1px solid #6c5ce7; padding: 3px 8px; border-radius: 4px; font-weight: 800; font-family: monospace;">STEP ${c.currentStep || 1}</span>`;
 
@@ -429,11 +578,40 @@ function main() {
             </div>
         `;
 
+        const breakoutBtn = card.querySelector('.breakout-case-btn');
+        if (breakoutBtn) {
+            breakoutBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation(); 
+                
+                const listTarget = app.db.activeCases;
+                const groupIdx = listTarget.findIndex(item => item.type === 'group' && item.cases.some(child => child.ticketId === c.ticketId));
+                
+                if (groupIdx !== -1) {
+                    const group = listTarget[groupIdx];
+                    const caseIdx = group.cases.findIndex(child => child.ticketId === c.ticketId);
+                    
+                    if (caseIdx !== -1) {
+                        const extractedCase = group.cases.splice(caseIdx, 1)[0];
+                        extractedCase.isFinalized = false; 
+                        listTarget.push(extractedCase); 
+                        
+                        checkAndDissolveGroup(app, groupIdx, false);
+                        StorageController.save(app.db);
+                        renderPortalDashboardHub();
+                    }
+                }
+            };
+            
+            breakoutBtn.onmouseenter = () => breakoutBtn.style.background = "#334155";
+            breakoutBtn.onmouseleave = () => breakoutBtn.style.background = "#222";
+        }
+
         card.onclick = () => launchTargetInvestigationWorkspace(c);
         return card;
     }
 
-    renderPortalDashboardHub();
+    window.renderPortalDashboardHub();
 }
 
 window.addEventListener('DOMContentLoaded', main);
