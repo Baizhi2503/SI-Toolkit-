@@ -1,4 +1,3 @@
-// src/engines/themeEngine.js
 const { StorageController } = require('../models');
 
 class Theme {
@@ -11,8 +10,8 @@ class Theme {
         this.glow = glowOpacity;
         this.darkAccent = darkAccent; 
         this.bgTint = bgTint;
-        this.panelTint = panelTint; // 🔥 Added for card surface depth
-        this.textTint = textTint;   // 🔥 Added for soft text matching
+        this.panelTint = panelTint; 
+        this.textTint = textTint;   
     }
 }
 
@@ -46,8 +45,8 @@ class ThemeEngine {
         root.style.setProperty('--theme-border', targetTheme.accent + '4D'); 
         root.style.setProperty('--theme-accent-dark', targetTheme.darkAccent);
         root.style.setProperty('--theme-bg-tint', targetTheme.bgTint);
-        root.style.setProperty('--theme-panel-tint', targetTheme.panelTint); // 🔥 Propagated 
-        root.style.setProperty('--theme-text-tint', targetTheme.textTint);   // 🔥 Propagated
+        root.style.setProperty('--theme-panel-tint', targetTheme.panelTint); 
+        root.style.setProperty('--theme-text-tint', targetTheme.textTint);   
     }
 }
 

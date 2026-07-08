@@ -4,7 +4,8 @@
   "description": "SI Investigation Portal with Advanced Modular Workspace UI",
   "main": "main.js",
   "scripts": {
-    "test-rookie": "electron .",
+    "test-rookie": "cross-env TEST_MODE=true electron .",
+    "start": "electron .",
     "package": "electron-builder"
   },
   "build": {
