@@ -11,7 +11,7 @@ class MediaPlayerEngine {
         this.undoStack = []; 
         this.redoStack = [];
         
-        this.currentBrushColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim() || '#ff4757';
+        this.currentBrushColor = '#ff4757'; 
         this.currentBrushType = 'box';
         this.isDrawing = false;
         this.isPanning = false;
@@ -27,6 +27,9 @@ class MediaPlayerEngine {
     }
 
     init() {
+        // Safe contextual assignment once DOM context has stabilized
+        this.currentBrushColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim() || '#ff4757';
+
         this.videoPlayer = document.getElementById('evidenceVideoPlayer');
         this.annotationCanvas = document.getElementById('evidenceAnnotationCanvas');
         this.galleryContainer = document.getElementById('evidenceGalleryTimeline');
@@ -47,7 +50,7 @@ class MediaPlayerEngine {
         
         getEl('canvasHandBtn')?.addEventListener('click', () => { this.activeCanvasTool = 'hand'; this.updateToolUIState(); });
         getEl('canvasRedBtn')?.addEventListener('click', () => { 
-            this.currentBrushColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim();
+            this.currentBrushColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim() || '#ff4757';
             this.activeCanvasTool = 'box'; 
             this.updateToolUIState(); 
         });
@@ -129,7 +132,7 @@ class MediaPlayerEngine {
             if (this.annotationModal && this.annotationModal.style.display === 'flex') {
                 if (key === '1') { this.activeCanvasTool = 'hand'; this.updateToolUIState(); } 
                 else if (key === '2') { 
-                    this.currentBrushColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim();
+                    this.currentBrushColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim() || '#ff4757';
                     this.activeCanvasTool = 'box'; 
                     this.updateToolUIState(); 
                 } 

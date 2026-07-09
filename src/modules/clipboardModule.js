@@ -198,6 +198,12 @@ class ClipboardModule extends BaseModule {
             message: this.getValueOrDefault(this.tokenInputs.message, '[MESSAGE]')
         };
 
+        if (templateType === 'verdict') {
+            output = output.replace(`**Victim (VICTIM_USERNAME): [INNOCENT/REASON]**`, `**Victim (VICTIM_USERNAME): [V_REASON]**`);
+            output = output.replace(/\[INNOCENT\/REASON\]/g, vals.sReason);
+            output = output.replace(/\[V_REASON\]/g, vals.vReason);
+        }
+
         output = output.replace(/\[DATE\]/g, vals.date);
         output = output.replace(/\[VICTIM_USERNAME\]/g, vals.victimUser);
         output = output.replace(/\[REASON\]/g, vals.reason);
@@ -205,11 +211,6 @@ class ClipboardModule extends BaseModule {
         
         output = output.replace(/\(SUSPECT_USERNAME\)/g, vals.suspectUser);
         output = output.replace(/\(VICTIM_USERNAME\)/g, vals.victimUser);
-        output = output.replace(/\[INNOCENT\/REASON\]/g, vals.sReason);
-        
-        if (templateType === 'verdict') {
-            output = output.replace(`**Victim (${vals.victimUser}): ${vals.sReason}**`, `**Victim (${vals.victimUser}): ${vals.vReason}**`);
-        }
         
         output = output.replace(/\[EVIDENCE\]/g, vals.evidence);
         output = output.replace(/\[MESSAGE\]/g, vals.message);
