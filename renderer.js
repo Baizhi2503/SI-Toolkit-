@@ -14,7 +14,7 @@ const ThemeEngine = require('./src/engines/themeEngine');
 
 class InvestigationPortal {
     constructor() {
-        this.db = null; 
+        this.db = null;
         this.currentCase = null;
         this.modules = [];
     }
@@ -67,15 +67,39 @@ class InvestigationPortal {
 }
 
 const app = new InvestigationPortal();
-window.app = app; 
+window.app = app;
 
 function main() {
-    app.init(); 
+    app.init();
 
     const savedThemeId = (app.db.investigatorProfile && app.db.investigatorProfile.activeTheme) ? app.db.investigatorProfile.activeTheme : 'red';
     ThemeEngine.applyTheme(savedThemeId);
 
     let autoSaveTimeout = null;
+    const globalLoader = document.getElementById('portalGlobalLoadingScreen');
+
+    window.executeWithLoadingOverlay = (taskCallback) => {
+        if (!globalLoader) {
+            taskCallback();
+            return;
+        }
+        
+        globalLoader.style.display = 'flex';
+        globalLoader.style.opacity = '1';
+        
+        setTimeout(() => {
+            try {
+                taskCallback();
+            } catch (err) {
+                console.error("Navigation Runtime Error:", err);
+            } finally {
+                globalLoader.style.opacity = '0';
+                setTimeout(() => {
+                    globalLoader.style.display = 'none';
+                }, 200);
+            }
+        }, 50);
+    };
 
     window.syncInvestigatorProfileUI = () => {
         const profile = app.db.investigatorProfile || {};
@@ -155,7 +179,7 @@ function main() {
 
     window.triggerSilentWorkspaceAutoSave = () => {
         const currentCase = app.getCurrentCase();
-        if (!currentCase || currentCase.isFinalized) return;
+        if (!currentCase || currentCase.isFinalized) return; //This is a test comment
 
         updateSyncUIIndicator('syncing');
 
@@ -212,7 +236,7 @@ function main() {
         if (!currentCase || currentCase.isFinalized) return;
         updateSyncUIIndicator('syncing');
         clearTimeout(autoSaveTimeout);
-        autoSaveTimeout = setTimeout(() => { window.triggerSilentWorkspaceAutoSave(); }, 500); 
+        autoSaveTimeout = setTimeout(() => { window.triggerSilentWorkspaceAutoSave(); }, 500);
     };
 
     window.addEventListener('input', handleWorkspaceInputQueue);
@@ -220,12 +244,15 @@ function main() {
 
     document.getElementById('navHomeBtn').addEventListener('click', (e) => {
         e.preventDefault();
-        if (app.getCurrentCase() && !app.getCurrentCase().isFinalized) {
-            window.triggerSilentWorkspaceAutoSave();
-        }
-        app.setCurrentCase(null);
-        renderPortalDashboardHub();
-        UI.welcomeScreen.style.display = 'flex';
+        
+        window.executeWithLoadingOverlay(() => {
+            if (app.getCurrentCase() && !app.getCurrentCase().isFinalized) {
+                window.triggerSilentWorkspaceAutoSave();
+            }
+            app.setCurrentCase(null);
+            renderPortalDashboardHub();
+            UI.welcomeScreen.style.display = 'flex';
+        });
     });
 
     document.getElementById('destructiveDeleteCaseBtn').addEventListener('click', (e) => {
@@ -234,31 +261,33 @@ function main() {
         if (!activeCase) return;
 
         if (confirm(`⚠️ CRITICAL WARNING:\nAre you absolutely certain you want to permanently delete Case Workspace [ ${activeCase.ticketId} ]?`)) {
-            
-            for (let i = app.db.activeCases.length - 1; i >= 0; i--) {
-                let item = app.db.activeCases[i];
-                if (item.type === 'group') {
-                    item.cases = item.cases.filter(child => child.ticketId !== activeCase.ticketId);
-                    checkAndDissolveGroup(app, i, false); 
-                } else if (item.ticketId === activeCase.ticketId) {
-                    app.db.activeCases.splice(i, 1);
-                }
-            }
 
-            for (let i = app.db.finalizedCases.length - 1; i >= 0; i--) {
-                let item = app.db.finalizedCases[i];
-                if (item.type === 'group') {
-                    item.cases = item.cases.filter(child => child.ticketId !== activeCase.ticketId);
-                    checkAndDissolveGroup(app, i, true);
-                } else if (item.ticketId === activeCase.ticketId) {
-                    app.db.finalizedCases.splice(i, 1);
+            window.executeWithLoadingOverlay(() => {
+                for (let i = app.db.activeCases.length - 1; i >= 0; i--) {
+                    let item = app.db.activeCases[i];
+                    if (item.type === 'group') {
+                        item.cases = item.cases.filter(child => child.ticketId !== activeCase.ticketId); //This is a test comment
+                        checkAndDissolveGroup(app, i, false); 
+                    } else if (item.ticketId === activeCase.ticketId) {
+                        app.db.activeCases.splice(i, 1);
+                    }
                 }
-            }
 
-            StorageController.save(app.db);
-            app.setCurrentCase(null);
-            renderPortalDashboardHub();
-            UI.welcomeScreen.style.display = 'flex';
+                for (let i = app.db.finalizedCases.length - 1; i >= 0; i--) {
+                    let item = app.db.finalizedCases[i];
+                    if (item.type === 'group') {
+                        item.cases = item.cases.filter(child => child.ticketId !== activeCase.ticketId);
+                        checkAndDissolveGroup(app, i, true);
+                    } else if (item.ticketId === activeCase.ticketId) {
+                        app.db.finalizedCases.splice(i, 1);
+                    }
+                }
+
+                StorageController.save(app.db);
+                app.setCurrentCase(null);
+                renderPortalDashboardHub();
+                UI.welcomeScreen.style.display = 'flex';
+            });
         }
     });
 
@@ -284,37 +313,40 @@ function main() {
         if (!activeCase || activeCase.isFinalized) return;
 
         if (confirm(`Are you ready to finalize Case ${activeCase.ticketId}?`)) {
-            window.triggerSilentWorkspaceAutoSave();
 
-            let parentGroupIdx = app.db.activeCases.findIndex(item => 
-                item.type === 'group' && item.cases.some(c => c.ticketId === activeCase.ticketId)
-            );
+            window.executeWithLoadingOverlay(() => {
+                window.triggerSilentWorkspaceAutoSave();
 
-            if (parentGroupIdx !== -1) {
-                const group = app.db.activeCases[parentGroupIdx];
-                const targetCaseInGroup = group.cases.find(c => c.ticketId === activeCase.ticketId);
-                
-                if (targetCaseInGroup) targetCaseInGroup.isFinalized = true;
-                const allCasesDone = group.cases.every(c => c.isFinalized);
+                let parentGroupIdx = app.db.activeCases.findIndex(item => 
+                    item.type === 'group' && item.cases.some(c => c.ticketId === activeCase.ticketId)
+                );
 
-                if (allCasesDone) {
-                    app.db.activeCases.splice(parentGroupIdx, 1);
-                    group.isFinalized = true; 
-                    app.db.finalizedCases.push(group);
-                    alert(`🔥 Serial suspects sweep complete! Entire group [ ${group.title} ] migrated to Finalized logs.`);
+                if (parentGroupIdx !== -1) {
+                    const group = app.db.activeCases[parentGroupIdx];
+                    const targetCaseInGroup = group.cases.find(c => c.ticketId === activeCase.ticketId);
+
+                    if (targetCaseInGroup) targetCaseInGroup.isFinalized = true;
+                    const allCasesDone = group.cases.every(c => c.isFinalized);
+
+                    if (allCasesDone) {
+                        app.db.activeCases.splice(parentGroupIdx, 1);
+                        group.isFinalized = true;
+                        app.db.finalizedCases.push(group);
+                        setTimeout(() => alert(`🔥 Serial suspects sweep complete! Entire group [ ${group.title} ] migrated to Finalized logs.`), 50);
+                    } else {
+                        setTimeout(() => alert(`🏁 Card marked [DONE]! Sibling tickets are still pending under this group stack.`), 50);
+                    }
                 } else {
-                    alert(`🏁 Card marked [DONE]! Sibling tickets are still pending under this group stack.`);
+                    app.db.activeCases = app.db.activeCases.filter(c => c.ticketId !== activeCase.ticketId);
+                    activeCase.isFinalized = true;
+                    app.db.finalizedCases.push(activeCase);
                 }
-            } else {
-                app.db.activeCases = app.db.activeCases.filter(c => c.ticketId !== activeCase.ticketId);
-                activeCase.isFinalized = true;
-                app.db.finalizedCases.push(activeCase);
-            }
 
-            StorageController.save(app.db);
-            app.setCurrentCase(null);
-            renderPortalDashboardHub();
-            UI.welcomeScreen.style.display = 'flex';
+                StorageController.save(app.db);
+                app.setCurrentCase(null);
+                renderPortalDashboardHub();
+                UI.welcomeScreen.style.display = 'flex';
+            });
         }
     });
 
@@ -327,44 +359,50 @@ function main() {
 
     function launchTargetInvestigationWorkspace(targetCaseRecord) {
         if (!targetCaseRecord) return;
-        app.setCurrentCase(Object.assign(new ScamCase(), targetCaseRecord));
-        const currentCase = app.getCurrentCase();
-        if (UI.sidebarCaseId) UI.sidebarCaseId.textContent = currentCase.ticketId;
-        
-        const ticketInput = document.getElementById('ticketIdInput');
-        if (ticketInput) ticketInput.value = currentCase.ticketId || '';
-        
-        const navTabs = document.querySelectorAll('.sidebar-nav li');
-        navTabs.forEach(tab => {
-            if (tab.closest('#settingsScreen')) return;
-            if (tab.getAttribute('data-target') === 'idTrackerTab') tab.classList.add('active');
-            else tab.classList.remove('active');
+
+        window.executeWithLoadingOverlay(() => {
+
+            updateSyncUIIndicator('default');
+
+            app.setCurrentCase(Object.assign(new ScamCase(), targetCaseRecord));
+            const currentCase = app.getCurrentCase();
+            if (UI.sidebarCaseId) UI.sidebarCaseId.textContent = currentCase.ticketId;
+
+            const ticketInput = document.getElementById('ticketIdInput');
+            if (ticketInput) ticketInput.value = currentCase.ticketId || '';
+            
+            const navTabs = document.querySelectorAll('.sidebar-nav li');
+            navTabs.forEach(tab => {
+                if (tab.closest('#settingsScreen')) return;
+                if (tab.getAttribute('data-target') === 'idTrackerTab') tab.classList.add('active');
+                else tab.classList.remove('active');
+            });
+
+            app.modules.forEach(mod => {
+                const isDefaultTab = mod.moduleName === 'IdTracker';
+                mod.toggleVisibility(isDefaultTab);
+            });
+
+            app.getModule('IdTracker')?.renderUI();
+            const evidenceApp = app.getModule('EvidenceManager');
+            if (evidenceApp) {
+                evidenceApp.resetGalleryTimeline();
+                if (currentCase.evidenceVideoPath) evidenceApp.loadAndMountVideoSourcePath(currentCase.evidenceVideoPath);
+                if (currentCase.evidenceFrames?.length > 0) evidenceApp.renderGalleryTimeline();
+            }
+            app.getModule('BanLogManager')?.syncUI(currentCase);
+            app.getModule('NotesChecklistManager')?.syncUI(currentCase);
+
+            const isLocked = !!currentCase.isFinalized;
+            if (ticketInput) ticketInput.disabled = isLocked;
+            if (document.getElementById('addNewSuspectProfileBtn')) document.getElementById('addNewSuspectProfileBtn').disabled = isLocked;
+            if (UI.closeCaseBtn) UI.closeCaseBtn.style.display = isLocked ? 'none' : 'block';
+            if (UI.welcomeScreen) UI.welcomeScreen.style.display = 'none';
         });
-
-        app.modules.forEach(mod => {
-            const isDefaultTab = mod.moduleName === 'IdTracker';
-            mod.toggleVisibility(isDefaultTab);
-        });
-
-        app.getModule('IdTracker')?.renderUI();
-        const evidenceApp = app.getModule('EvidenceManager');
-        if (evidenceApp) {
-            evidenceApp.resetGalleryTimeline();
-            if (currentCase.evidenceVideoPath) evidenceApp.loadAndMountVideoSourcePath(currentCase.evidenceVideoPath);
-            if (currentCase.evidenceFrames?.length > 0) evidenceApp.renderGalleryTimeline();
-        }
-        app.getModule('BanLogManager')?.syncUI(currentCase);
-        app.getModule('NotesChecklistManager')?.syncUI(currentCase);
-
-        const isLocked = !!currentCase.isFinalized;
-        if (ticketInput) ticketInput.disabled = isLocked;
-        if (document.getElementById('addNewSuspectProfileBtn')) document.getElementById('addNewSuspectProfileBtn').disabled = isLocked;
-        if (UI.closeCaseBtn) UI.closeCaseBtn.style.display = isLocked ? 'none' : 'block';
-        if (UI.welcomeScreen) UI.welcomeScreen.style.display = 'none';
     }
 
     window.renderPortalDashboardHub = function() {
-        app.db = StorageController.load(); 
+        app.db = StorageController.load();
         const pContainer = document.getElementById('pendingCasesContainer');
         const fContainer = document.getElementById('finalizedCasesContainer');
         const dashboardLayout = document.getElementById('portalDashboardLayout');
@@ -387,10 +425,10 @@ function main() {
         if (isNewUser) {
             if (coreDashboardWrapper) coreDashboardWrapper.style.display = 'none';
             if (profileBadge) profileBadge.style.display = 'none';
-            
+
             if (onboardingCard) {
                 onboardingCard.style.display = 'flex';
-                
+
                 const proceedBtn = document.getElementById('onboardingProceedBtn');
                 if (proceedBtn) {
                     proceedBtn.onclick = (e) => {
@@ -405,7 +443,7 @@ function main() {
         } else {
             if (onboardingCard) onboardingCard.style.display = 'none';
             if (coreDashboardWrapper) coreDashboardWrapper.style.display = 'flex';
-            if (profileBadge) profileBadge.style.display = 'flex'; 
+            if (profileBadge) profileBadge.style.display = 'flex';
 
             if (dashboardLayout) dashboardLayout.style.display = 'grid';
             if (newCaseBtn) newCaseBtn.style.display = 'block';
@@ -416,7 +454,7 @@ function main() {
                         No active investigations found.
                     </div>
                 `;
-                
+
                 let emptyStateBanner = document.getElementById('dashboardEmptyStateBanner');
                 if (!emptyStateBanner) {
                     emptyStateBanner = document.createElement('div');
@@ -472,7 +510,7 @@ function main() {
                 });
             }
         }
-        
+
         window.syncInvestigatorProfileUI();
     };
 
@@ -496,7 +534,7 @@ function main() {
         zone.addEventListener('drop', (e) => {
             e.preventDefault();
             zone.style.backgroundColor = "transparent";
-            
+
             const draggedId = e.dataTransfer.getData('text/plain');
             const sourceGroupId = e.dataTransfer.getData('source-parent-group');
 
@@ -508,12 +546,12 @@ function main() {
             if (groupIdx !== -1) {
                 const group = listTarget[groupIdx];
                 const caseIdx = group.cases.findIndex(c => c.ticketId === draggedId);
-                
+
                 if (caseIdx !== -1) {
                     const caseObj = group.cases.splice(caseIdx, 1)[0];
                     caseObj.isFinalized = false;
                     listTarget.push(caseObj);
-                    
+
                     checkAndDissolveGroup(app, groupIdx, false);
                     StorageController.save(app.db);
                     renderPortalDashboardHub();
@@ -527,14 +565,13 @@ function main() {
 
     function buildDynamicPortalCaseCardElement(c, isArchive = false, isGroupChild = false) {
         const card = document.createElement('div');
-        
-        let borderColor = 'var(--theme-accent)';
-        if (isArchive) borderColor = 'var(--theme-accent-dark)'; 
-        else if (isGroupChild) borderColor = 'var(--theme-accent)'; 
 
-        // 🔥 Refactored: Swapped out hardcoded #1e1e28 surface canvas logic to dynamic panel colors
+        let borderColor = 'var(--theme-accent)';
+        if (isArchive) borderColor = 'var(--theme-accent-dark)';
+        else if (isGroupChild) borderColor = 'var(--theme-accent)';
+
         card.style.cssText = `background: var(--theme-panel-tint); border: 1px solid ${borderColor}; padding: 15px; border-radius: 8px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; gap: 8px; position: relative; box-shadow: 0 4px 12px var(--theme-glow); color: var(--theme-text-tint);`;
-        
+
         card.onmouseenter = () => { card.style.transform = 'translateY(-2px)'; card.style.boxShadow = `0 6px 18px var(--theme-glow)`; };
         card.onmouseleave = () => { card.style.transform = 'none'; card.style.boxShadow = '0 4px 12px var(--theme-glow)'; };
 
@@ -546,7 +583,7 @@ function main() {
         const rStr = robList.length > 0 ? robList.slice(0, 5).join(', ') : 'NULL';
 
         const isSyndicate = suspectsArray.length > 1;
-        
+
         let badgeHTML = '';
         if (isSyndicate) {
             badgeHTML = `<span style="font-size: 10px; background: rgba(0, 0, 0, 0.25); color: var(--theme-accent-dark); padding: 3px 8px; border-radius: 4px; font-weight: 900; border: 1px solid var(--theme-accent-dark);">SYNDICATE</span>`;
@@ -570,10 +607,14 @@ function main() {
 
         const stepTagHTML = `<span style="font-size: 11px; background: var(--theme-glow); color: var(--theme-accent); border: 1px solid var(--theme-border); padding: 3px 8px; border-radius: 4px; font-weight: 800; font-family: monospace;">STEP ${c.currentStep || 1}</span>`;
 
-        // 🔥 Soft-tinted header text fields applied cleanly
         card.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 6px;">
-                <strong style="color: var(--theme-text-tint); Hong-family: monospace; font-size: 14px;">📂 ${c.ticketId}</strong>
+                <strong style="color: var(--theme-text-tint); font-family: monospace; font-size: 14px; display: inline-flex; align-items: center;">
+                    <svg class="hifi-icon" viewBox="0 0 24 24" style="color: var(--theme-accent); width: 16px; height: 16px;">
+                        <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                    </svg>
+                    ${c.ticketId}
+                </strong>
                 <div style="display: flex; gap: 6px; align-items: center;">${stepTagHTML}${badgeHTML}</div>
             </div>
             <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; font-size: 12px; line-height: 1.4;">
@@ -588,27 +629,27 @@ function main() {
         if (breakoutBtn) {
             breakoutBtn.onclick = (e) => {
                 e.preventDefault();
-                e.stopPropagation(); 
-                
+                e.stopPropagation();
+
                 const listTarget = app.db.activeCases;
                 const groupIdx = listTarget.findIndex(item => item.type === 'group' && item.cases.some(child => child.ticketId === c.ticketId));
-                
+
                 if (groupIdx !== -1) {
                     const group = listTarget[groupIdx];
                     const caseIdx = group.cases.findIndex(child => child.ticketId === c.ticketId);
-                    
+
                     if (caseIdx !== -1) {
                         const extractedCase = group.cases.splice(caseIdx, 1)[0];
-                        extractedCase.isFinalized = false; 
-                        listTarget.push(extractedCase); 
-                        
+                        extractedCase.isFinalized = false;
+                        listTarget.push(extractedCase);
+
                         checkAndDissolveGroup(app, groupIdx, false);
                         StorageController.save(app.db);
                         renderPortalDashboardHub();
                     }
                 }
             };
-            
+
             breakoutBtn.onmouseenter = () => breakoutBtn.style.background = "#334155";
             breakoutBtn.onmouseleave = () => breakoutBtn.style.background = "#222";
         }

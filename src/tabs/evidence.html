@@ -1,8 +1,14 @@
-<h2 style="color: var(--theme-text-tint); margin: 0 0 10px 0; font-size: 20px; font-family: monospace;">🎬 Evidence Reordering & Video Processing Engine</h2>
+<h2 style="color: var(--theme-text-tint); margin: 0 0 10px 0; font-size: 20px; font-family: monospace; display: flex; align-items: center; gap: 8px;">
+    <svg class="hifi-icon" viewBox="0 0 24 24" style="width: 22px; height: 22px;"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
+    Evidence Reordering & Video Processing Engine
+</h2>
 
 <div class="evidence-panel-card" style="background: var(--bg-panel); border: 1px solid var(--border); padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 4px 12px var(--theme-glow);">
     <div>
-        <h4 style="color: var(--theme-accent); margin: 0 0 5px 0; font-size: 15px; font-family: monospace;">🎥 Native Video Reverser Engine</h4>
+        <h4 style="color: var(--theme-accent); margin: 0 0 5px 0; font-size: 15px; font-family: monospace; display: flex; align-items: center; gap: 6px;">
+            <svg class="hifi-icon" viewBox="0 0 24 24"><path d="M19 8l-4 4h3c0 3.31-2.69 6-6 6-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C8.97 19.54 10.43 20 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46C15.03 4.46 13.57 4 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z"/></svg>
+            Native Video Reverser Engine
+        </h4>
         <p style="color: var(--text-muted); margin: 0; font-size: 12px;">Reverse both video frames and audio tracks natively without freezing your Electron renderer thread.</p>
     </div>
 
@@ -29,7 +35,10 @@
 </div>
 
 <div style="background: var(--bg-panel); border: 1px solid var(--border); padding: 20px; border-radius: 8px;">
-    <h4 style="margin: 0 0 10px 0; color: var(--theme-accent); font-family: monospace;">Media Player Helper</h4>
+    <h4 style="margin: 0 0 10px 0; color: var(--theme-accent); font-family: monospace; display: flex; align-items: center; gap: 6px;">
+        <svg class="hifi-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+        Media Player Helper
+    </h4>
     <div style="display: flex; gap: 15px; margin-bottom: 15px;">
         <input type="text" id="videoPathDisplay" placeholder="No evidence video loaded..." readonly style="flex: 1;">
         <button class="action-btn" id="selectVideoBtn" style="background: var(--theme-gradient); white-space: nowrap;">Load Video</button>
@@ -41,7 +50,10 @@
     </p>
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin: 25px 0 10px 0; border-top: 1px solid var(--border); padding-top: 15px;">
-        <h4 style="margin: 0; color: var(--text-main); font-family: monospace;">Captured Case Frames Timeline</h4>
+        <h4 style="margin: 0; color: var(--text-main); font-family: monospace; display: flex; align-items: center; gap: 6px;">
+            <svg class="hifi-icon" viewBox="0 0 24 24"><path d="M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4l2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z"/></svg>
+            Captured Case Frames Timeline
+        </h4>
         <button class="action-btn" id="exportGalleryBtn" style="background: var(--theme-gradient); padding: 6px 14px; font-size: 13px;">Export Gallery to Folder</button>
     </div>
     
@@ -54,7 +66,10 @@
             <h3 style="margin: 0; color: var(--theme-accent); font-family: monospace;">Target Review Annotation Canvas</h3>
             
             <div style="display: flex; align-items: center; gap: 10px; background: #111116; padding: 5px 15px; border-radius: 4px; border: 1px solid var(--border);">
-                <span style="font-size: 12px; color: var(--text-muted); font-family: monospace;">🔍 Zoom:</span>
+                <span style="font-size: 12px; color: var(--text-muted); font-family: monospace; display: flex; align-items: center; gap: 4px;">
+                    <svg class="hifi-icon" viewBox="0 0 24 24" style="margin-right: 2px;"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    Zoom:
+                </span>
                 <input type="range" id="canvasZoomSlider" min="0.5" max="4" step="0.1" value="1" style="width: 100px; margin: 0; cursor: pointer;">
                 <span id="zoomPercentDisplay" style="font-size: 12px; font-weight: bold; min-width: 35px; font-family: monospace;">100%</span>
             </div>
@@ -64,8 +79,8 @@
                 <button class="action-btn" id="canvasRedBtn" style="background: var(--theme-gradient); padding: 8px 14px; font-family: monospace;">Solid Block (2)</button>
                 <button class="action-btn" id="canvasYellowBtn" style="background: #ffa502; padding: 8px 14px; font-family: monospace;">Highlight (3)</button>
                 <button class="action-btn" id="canvasCropBtn" style="background: #747d8c; padding: 8px 14px; font-family: monospace;">Crop (4)</button>
-                <button class="action-btn" id="canvasUndoBtn" style="background: #57606f; padding: 8px 14px; font-family: monospace;">(↩) Undo</button>
-                <button class="action-btn" id="canvasRedoBtn" style="background: #57606f; padding: 8px 14px; font-family: monospace;">(↪) Redo</button>
+                <button class="action-btn" id="canvasUndoBtn" style="background: #57606f; padding: 8px 14px; font-family: monospace;">Undo</button>
+                <button class="action-btn" id="canvasRedoBtn" style="background: #57606f; padding: 8px 14px; font-family: monospace;">Redo</button>
                 <button class="action-btn" id="canvasCancelBtn" style="background: #ff4757; padding: 8px 14px; font-weight: bold; font-family: monospace;">Cancel</button>
                 <button class="action-btn" id="canvasSaveBtn" style="background: #2ed573; padding: 8px 14px; font-weight: bold; font-family: monospace;">Done</button>
             </div>

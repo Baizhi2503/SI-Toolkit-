@@ -1,7 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
-const fs = require('fs'); 
-const { execFileSync } = require('child_process');
+const fs = require('fs');
 const { spawn } = require('child_process');
 const ffmpegPath = require('ffmpeg-static');
 
@@ -63,12 +62,12 @@ ipcMain.handle('dialog:showSaveDialog', async (event, options) => {
 
 ipcMain.handle('video:reverse', async (event, { inputPath, outputPath }) => {
     return new Promise((resolve, reject) => {
-        const args = [
-            '-y',             
-            '-i', inputPath, 
-            '-vf', 'reverse', 
+        const args = [ //This is a test comment
+            '-y',
+            '-i', inputPath,
+            '-vf', 'reverse',
             '-af', 'areverse',
-            outputPath        
+            outputPath
         ];
 
         const ffmpegProcess = spawn(ffmpegPath, args);

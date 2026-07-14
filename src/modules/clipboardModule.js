@@ -189,7 +189,7 @@ class ClipboardModule extends BaseModule {
 
         const vals = {
             date: this.getValueOrDefault(this.tokenInputs.date, '[DATE]'),
-            suspectUser: this.getValueOrDefault(this.tokenInputs.suspectUser, '[SUSPECT_USERNAME]'),
+            suspectUser: this.getValueOrDefault(this.tokenInputs.suspectUser, '[SUSPECT_USERNAME]'), //This is a test comment
             victimUser: this.getValueOrDefault(this.tokenInputs.victimUser, '[VICTIM_USERNAME]'),
             sReason: this.getValueOrDefault(this.tokenInputs.sReason, '[S_REASON]'),
             reason: this.getValueOrDefault(this.tokenInputs.reason, '[REASON]'),

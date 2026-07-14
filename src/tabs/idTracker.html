@@ -1,4 +1,7 @@
-<h2 style="color: var(--theme-text-tint); margin: 0 0 10px 0; font-size: 20px; font-family: monospace;">👤 Suspect Identity Profiling</h2>
+<h2 style="color: var(--theme-text-tint); margin: 0 0 10px 0; font-size: 20px; font-family: monospace; display: flex; align-items: center; gap: 8px;">
+    <svg class="hifi-icon" viewBox="0 0 24 24" style="width: 22px; height: 22px;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5-4-8-4z"/></svg>
+    Suspect Identity Profiling
+</h2>
 
 <div class="form-group">
     <label for="ticketIdInput">Ticket ID Reference</label>
@@ -9,8 +12,9 @@
     <label style="display: block; margin-bottom: 8px;">Target Suspect Dossiers</label>
     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
         <div id="suspectProfileTabsContainer" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
-        <button id="addNewSuspectProfileBtn" style="background: #23232e; border: 1px dashed var(--theme-accent); color: var(--theme-accent); padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 12px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 6px var(--theme-glow);">
-            ➕ Add Additional Suspect Dossier
+        <button id="addNewSuspectProfileBtn" style="background: #23232e; border: 1px dashed var(--theme-accent); color: var(--theme-accent); padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 12px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 6px var(--theme-glow); display: inline-flex; align-items: center; gap: 6px;">
+            <svg class="hifi-icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            Add Additional Suspect Dossier
         </button>
     </div>
 </div>

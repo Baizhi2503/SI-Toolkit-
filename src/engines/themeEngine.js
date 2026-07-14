@@ -8,10 +8,10 @@ class Theme {
         this.hover = hover;
         this.gradient = `linear-gradient(135deg, ${startGrad}, ${endGrad})`;
         this.glow = glowOpacity;
-        this.darkAccent = darkAccent; 
+        this.darkAccent = darkAccent;
         this.bgTint = bgTint;
-        this.panelTint = panelTint; 
-        this.textTint = textTint;   
+        this.panelTint = panelTint;
+        this.textTint = textTint;
     }
 }
 
@@ -42,11 +42,11 @@ class ThemeEngine {
         root.style.setProperty('--theme-accent-hover', targetTheme.hover);
         root.style.setProperty('--theme-gradient', targetTheme.gradient);
         root.style.setProperty('--theme-glow', targetTheme.glow);
-        root.style.setProperty('--theme-border', targetTheme.accent + '4D'); 
+        root.style.setProperty('--theme-border', targetTheme.accent + '4D');
         root.style.setProperty('--theme-accent-dark', targetTheme.darkAccent);
         root.style.setProperty('--theme-bg-tint', targetTheme.bgTint);
-        root.style.setProperty('--theme-panel-tint', targetTheme.panelTint); 
-        root.style.setProperty('--theme-text-tint', targetTheme.textTint);   
+        root.style.setProperty('--theme-panel-tint', targetTheme.panelTint);
+        root.style.setProperty('--theme-text-tint', targetTheme.textTint);
     }
 }
 

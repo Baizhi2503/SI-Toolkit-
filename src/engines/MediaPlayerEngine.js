@@ -4,18 +4,18 @@ const { ipcRenderer } = require('electron');
 
 class MediaPlayerEngine {
     constructor(moduleInstance) {
-        this.mod = moduleInstance; 
+        this.mod = moduleInstance;
         
         this.activeEditingIndex = null;
         this.originalImageState = null;
-        this.undoStack = []; 
+        this.undoStack = [];
         this.redoStack = [];
         
-        this.currentBrushColor = '#ff4757'; 
+        this.currentBrushColor = '#ff4757';
         this.currentBrushType = 'box';
         this.isDrawing = false;
         this.isPanning = false;
-        this.isCropping = false; 
+        this.isCropping = false;
         this.startX = 0; this.startY = 0; this.panStartX = 0; this.panStartY = 0;
         this.cropStartX = 0; this.cropStartY = 0; this.cropCurrentX = 0; this.cropCurrentY = 0;
         this.currentPanX = 100; this.currentPanY = 100;
@@ -27,7 +27,6 @@ class MediaPlayerEngine {
     }
 
     init() {
-        // Safe contextual assignment once DOM context has stabilized
         this.currentBrushColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim() || '#ff4757';
 
         this.videoPlayer = document.getElementById('evidenceVideoPlayer');
@@ -51,8 +50,8 @@ class MediaPlayerEngine {
         getEl('canvasHandBtn')?.addEventListener('click', () => { this.activeCanvasTool = 'hand'; this.updateToolUIState(); });
         getEl('canvasRedBtn')?.addEventListener('click', () => { 
             this.currentBrushColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim() || '#ff4757';
-            this.activeCanvasTool = 'box'; 
-            this.updateToolUIState(); 
+            this.activeCanvasTool = 'box';
+            this.updateToolUIState();
         });
         getEl('canvasYellowBtn')?.addEventListener('click', () => { this.activeCanvasTool = 'highlight'; this.updateToolUIState(); });
         getEl('canvasUndoBtn')?.addEventListener('click', () => this.triggerUndoAction());
@@ -126,15 +125,15 @@ class MediaPlayerEngine {
                     if (!this.videoPlayer.paused) this.videoPlayer.pause();
                     this.captureFrameToGallery();
                 }
-                return; 
+                return;
             }
 
             if (this.annotationModal && this.annotationModal.style.display === 'flex') {
-                if (key === '1') { this.activeCanvasTool = 'hand'; this.updateToolUIState(); } 
-                else if (key === '2') { 
+                if (key === '1') { this.activeCanvasTool = 'hand'; this.updateToolUIState(); }
+                else if (key === '2') {
                     this.currentBrushColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim() || '#ff4757';
-                    this.activeCanvasTool = 'box'; 
-                    this.updateToolUIState(); 
+                    this.activeCanvasTool = 'box';
+                    this.updateToolUIState();
                 } 
                 else if (key === '3') { this.activeCanvasTool = 'highlight'; this.updateToolUIState(); } 
                 else if (key === '4') { this.activeCanvasTool = 'crop'; this.updateToolUIState(); }
@@ -152,7 +151,7 @@ class MediaPlayerEngine {
                 e.preventDefault();
                 const zoomFactor = 0.1;
                 const previousScale = this.currentZoomScale;
-                if (e.deltaY < 0) { this.currentZoomScale = Math.min(4, this.currentZoomScale + zoomFactor); } 
+                if (e.deltaY < 0) { this.currentZoomScale = Math.min(4, this.currentZoomScale + zoomFactor); }
                 else { this.currentZoomScale = Math.max(0.1, this.currentZoomScale - zoomFactor); }
 
                 if (this.currentZoomScale !== previousScale) {
@@ -165,7 +164,7 @@ class MediaPlayerEngine {
                     this.applyViewportTransformations();
                 }
             }
-        }, { passive: false }); 
+        }, { passive: false });
 
         this.canvasViewportContainer.addEventListener('mousedown', (e) => {
             if (this.activeCanvasTool === 'hand' || e.button === 1) {
@@ -190,8 +189,8 @@ class MediaPlayerEngine {
             if (this.isCropping) {
                 const coords = this.getCanvasMouseCoordinates(e);
                 this.cropCurrentX = coords.x; this.cropCurrentY = coords.y;
-                this.ctx.putImageData(this.originalImageState, 0, 0); 
-                this.ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim() || '#ffa502'; 
+                this.ctx.putImageData(this.originalImageState, 0, 0);
+                this.ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim() || '#ffa502';
                 this.ctx.lineWidth = 2 / this.currentZoomScale;
                 this.ctx.setLineDash([6, 4]); this.ctx.strokeRect(this.cropStartX, this.cropStartY, this.cropCurrentX - this.cropStartX, this.cropCurrentY - this.cropStartY);
                 this.ctx.setLineDash([]); return;
@@ -234,10 +233,13 @@ class MediaPlayerEngine {
     }
 
     resetGalleryTimeline() {
-        if(this.galleryContainer) this.galleryContainer.innerHTML = ''; 
+        const disp = document.getElementById('videoPathDisplay');
+        if (disp) disp.value = '';
+
+        if(this.galleryContainer) this.galleryContainer.innerHTML = '';
         if (this.videoPlayer) {
-            this.videoPlayer.src = ''; 
-            this.videoPlayer.style.display = 'none'; 
+            this.videoPlayer.src = '';
+            this.videoPlayer.style.display = 'none';
         }
         if (this.videoHint) this.videoHint.style.display = 'none'; 
         if (this.annotationCanvas && this.ctx) {
@@ -355,12 +357,12 @@ class MediaPlayerEngine {
             const scaleX = (vWidth - 40) / this.annotationCanvas.width; const scaleY = (vHeight - 40) / this.annotationCanvas.height;
             
             this.currentZoomScale = Math.max(0.5, Math.min(1, scaleX, scaleY));
-            if(this.canvasZoomSlider) this.canvasZoomSlider.value = this.currentZoomScale; 
+            if(this.canvasZoomSlider) this.canvasZoomSlider.value = this.currentZoomScale;
             if(this.zoomPercentDisplay) this.zoomPercentDisplay.textContent = `${Math.round(this.currentZoomScale * 100)}%`;
             
-            this.currentPanX = (vWidth - (this.annotationCanvas.width * this.currentZoomScale)) / 2; 
+            this.currentPanX = (vWidth - (this.annotationCanvas.width * this.currentZoomScale)) / 2;
             this.currentPanY = (vHeight - (this.annotationCanvas.height * this.currentZoomScale)) / 2;
-            this.applyViewportTransformations(); 
+            this.applyViewportTransformations();
             if (this.annotationModal) this.annotationModal.style.display = 'flex';
         };
     }
@@ -375,32 +377,32 @@ class MediaPlayerEngine {
         if(this.canvasViewportContainer) this.canvasViewportContainer.style.cursor = this.activeCanvasTool === 'hand' ? 'grab' : (this.activeCanvasTool === 'crop' ? 'crosshair' : 'default');
     }
 
-    applyViewportTransformations() { 
+    applyViewportTransformations() {
         const wrapper = document.getElementById('canvasZoomWrapper');
-        if (wrapper) wrapper.style.transform = `translate(${this.currentPanX}px, ${this.currentPanY}px) scale(${this.currentZoomScale})`; 
+        if (wrapper) wrapper.style.transform = `translate(${this.currentPanX}px, ${this.currentPanY}px) scale(${this.currentZoomScale})`;
     }
     
-    getCanvasMouseCoordinates(e) { 
-        const rect = this.annotationCanvas.getBoundingClientRect(); 
-        return { x: (e.clientX - rect.left) * (this.annotationCanvas.width / rect.width), y: (e.clientY - rect.top) * (this.annotationCanvas.height / rect.height) };  
+    getCanvasMouseCoordinates(e) {
+        const rect = this.annotationCanvas.getBoundingClientRect();
+        return { x: (e.clientX - rect.left) * (this.annotationCanvas.width / rect.width), y: (e.clientY - rect.top) * (this.annotationCanvas.height / rect.height) };
     }
     
-    triggerUndoAction() { 
-        if (this.undoStack.length > 0) { 
-            this.redoStack.push(this.ctx.getImageData(0, 0, this.annotationCanvas.width, this.annotationCanvas.height)); 
-            const pastState = this.undoStack.pop(); this.ctx.putImageData(pastState, 0, 0); this.originalImageState = pastState; 
-        } 
+    triggerUndoAction() {
+        if (this.undoStack.length > 0) {
+            this.redoStack.push(this.ctx.getImageData(0, 0, this.annotationCanvas.width, this.annotationCanvas.height));
+            const pastState = this.undoStack.pop(); this.ctx.putImageData(pastState, 0, 0); this.originalImageState = pastState;
+        }
     }
     
-    triggerRedoAction() { 
-        if (this.redoStack.length > 0) { 
-            this.undoStack.push(this.ctx.getImageData(0, 0, this.annotationCanvas.width, this.annotationCanvas.height)); 
-            const forwardState = this.redoStack.pop(); this.ctx.putImageData(forwardState, 0, 0); this.originalImageState = forwardState; 
-        } 
+    triggerRedoAction() {
+        if (this.redoStack.length > 0) {
+            this.undoStack.push(this.ctx.getImageData(0, 0, this.annotationCanvas.width, this.annotationCanvas.height));
+            const forwardState = this.redoStack.pop(); this.ctx.putImageData(forwardState, 0, 0); this.originalImageState = forwardState;
+        }
     }
     
-    triggerWorkspaceAutoSaveNotification() { 
-        if (typeof window.triggerSilentWorkspaceAutoSave === 'function') window.triggerSilentWorkspaceAutoSave(); 
+    triggerWorkspaceAutoSaveNotification() {
+        if (typeof window.triggerSilentWorkspaceAutoSave === 'function') window.triggerSilentWorkspaceAutoSave();
     }
 }
 

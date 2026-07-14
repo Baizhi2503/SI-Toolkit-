@@ -31,7 +31,7 @@ class NotesChecklistModule extends BaseModule {
     onActivate() {
         this.syncUI(this.app.getCurrentCase());
     }
-    
+
     syncUI(currentCase) {
         if (!currentCase) return;
 

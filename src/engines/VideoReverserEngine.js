@@ -2,7 +2,7 @@ const { ipcRenderer } = require('electron');
 
 class VideoReverserEngine {
     constructor(moduleInstance) {
-        this.mod = moduleInstance; 
+        this.mod = moduleInstance;
         this.inputVideoFilePath = "";
         this.outputVideoFilePath = "";
     }

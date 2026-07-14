@@ -39,7 +39,12 @@ class SettingsModule extends BaseModule {
         const themeLi = document.createElement('li');
         themeLi.setAttribute('data-settings-target', 'settingsThemesTab');
         themeLi.style.cursor = 'pointer';
-        themeLi.innerHTML = `🎨 Interface Themes`;
+        themeLi.style.display = 'inline-flex';
+        themeLi.style.alignItems = 'center';
+        themeLi.style.gap = '6px';
+        themeLi.innerHTML = `
+            <svg class="hifi-icon" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-8 4.03-8 8 0 .73.11 1.42.3 2.06.12.4.6.59.96.32l1.09-.82c.42-.31.98-.32 1.41-.01l1.51 1.06c.41.29.95.27 1.34-.04l1.32-1.05c.42-.33 1.01-.3 1.39.07l1.52 1.48c.31.3.78.36 1.15.15l2.45-1.36c.43-.24.63-.76.43-1.22C19.46 9.8 16.48 3 12 3zm-4.5 6c-.83 0-1.5-.67-1.5-1.5S6.67 6 7.5 6s1.5.67 1.5 1.5S8.33 9 7.5 9zm3.5 4c-.83 0-1.5-.67-1.5-1.5S10.17 10 11 10s1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-6c-.83 0-1.5-.67-1.5-1.5S10.17 4 11 4s1.5.67 1.5 1.5S11.83 7 11.5 7zm4.5 4c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+            Interface Themes`;
         subNav.appendChild(themeLi);
 
         const themesTabPanel = document.createElement('div');
@@ -49,7 +54,7 @@ class SettingsModule extends BaseModule {
 
         themesTabPanel.innerHTML = `
             <div style="border-bottom: 1px solid #2a2a35; padding-bottom: 12px; margin-bottom: 5px;">
-                <h2 style="color: #fff; font-size: 20px; font-weight: bold; border: none; margin: 0; padding: 0;">🎨 Operational Interface Themes</h2>
+                <h2 style="color: #fff; font-size: 20px; font-weight: bold; border: none; margin: 0; padding: 0;">Operational Interface Themes</h2>
                 <p style="color: var(--text-muted); font-size: 13px; margin: 6px 0 0 0;">Hot-swap core layout tokens to match your active hidden department profiles.</p>
             </div>
             
@@ -88,7 +93,7 @@ class SettingsModule extends BaseModule {
         profileTab.parentNode.appendChild(themesTabPanel);
 
         const optionsGrid = document.getElementById('themeOptionsNodeGrid');
-        ThemeEngine.getAvailableThemes().forEach(t => {
+        ThemeEngine.getAvailableThemes().forEach(t => { //This is a test comment
             const btn = document.createElement('button');
             btn.style.cssText = 'background: #161622; border: 1px solid #2a2a38; color: #cbd5e1; padding: 16px 20px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease-in-out; font-family: monospace;';
             
@@ -195,14 +200,18 @@ class SettingsModule extends BaseModule {
         if (this.closeSettingsBtn) {
             this.closeSettingsBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.saveSettingsPayload();
+                window.executeWithLoadingOverlay(() => {
+                    this.saveSettingsPayload();
+                });
             });
         }
 
         if (this.cancelSettingsBtn) {
             this.cancelSettingsBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.settingsScreen.style.display = 'none';
+                window.executeWithLoadingOverlay(() => {
+                    this.settingsScreen.style.display = 'none';
+                });
             });
         }
     }
@@ -260,7 +269,7 @@ class SettingsModule extends BaseModule {
             if (this.setProfileName) {
                 this.setProfileName.focus();
             }
-            return; 
+            return;
         }
 
         this.app.db.investigatorProfile.name = inputName;
@@ -324,7 +333,7 @@ class SettingsModule extends BaseModule {
             }
             if (typeof window.renderPortalDashboardHub === 'function') {
                 window.renderPortalDashboardHub();
-            }   
+            }
         }
     }
 }

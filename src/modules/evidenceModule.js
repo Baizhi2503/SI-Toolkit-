@@ -5,7 +5,7 @@ const VideoReverserEngine = require('../engines/VideoReverserEngine');
 class EvidenceModule extends BaseModule {
     constructor() {
         super('EvidenceManager', 'evidenceTab', 'evidenceTab');
-        
+
         this.mediaPlayer = new MediaPlayerEngine(this);
         this.videoReverser = new VideoReverserEngine(this);
     }

@@ -89,9 +89,9 @@ function buildDynamicGroupContainerCard(groupObj, groupIndex, buildCardFn) {
     };
 
     container.addEventListener('dragover', (e) => e.preventDefault());
-    container.addEventListener('drop', (e) => {  
+    container.addEventListener('drop', (e) => {
         e.preventDefault();
-        e.stopPropagation(); 
+        e.stopPropagation();
         const { app, renderPortalDashboardHub } = window;
         const draggedTicketId = e.dataTransfer.getData('text/plain');
         const sourceGroupId = e.dataTransfer.getData('source-parent-group');
@@ -146,7 +146,7 @@ function attachCardGroupingDragListeners(cardElement, ticketId) {
 
     cardElement.addEventListener('dragover', (e) => {
         e.preventDefault();
-        cardElement.style.border = '2px dashed var(--theme-accent)'; 
+        cardElement.style.border = '2px dashed var(--theme-accent)';
     });
 
     cardElement.addEventListener('dragleave', () => {
@@ -186,13 +186,13 @@ function attachCardGroupingDragListeners(cardElement, ticketId) {
 
         if (srcCase && destIdx !== -1) {
             const destCase = app.db.activeCases.splice(destIdx, 1)[0];
-            const totalGroupsExist = app.db.activeCases.filter(c => c.type === 'group').length + 
+            const totalGroupsExist = app.db.activeCases.filter(c => c.type === 'group').length +
                                      app.db.finalizedCases.filter(c => c.type === 'group').length;
 
             const newGroup = {
                 id: `group-${Date.now()}`,
                 type: 'group',
-                title: `Group ${totalGroupsExist + 1}`, 
+                title: `Group ${totalGroupsExist + 1}`,
                 cases: [destCase, srcCase]
             };
 

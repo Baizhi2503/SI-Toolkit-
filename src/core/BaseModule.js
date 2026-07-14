@@ -4,12 +4,12 @@ class BaseModule {
         this.moduleName = moduleName;
         this.tabElement = document.querySelector(`[data-target="${tabTargetId}"]`);
         this.panelElement = document.getElementById(panelId);
-        this.app = null; 
+        this.app = null;
     }
 
-    onInit() { console.log(`${this.moduleName} initialized.`); }
-    onActivate() { }
-    onDeactivate() { }
+    onInit() {}
+    onActivate() {}
+    onDeactivate() {}
 
     mount(appContext) {
         this.app = appContext;

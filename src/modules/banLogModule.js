@@ -3,8 +3,8 @@ const BaseModule = require('../core/BaseModule');
 class BanLogModule extends BaseModule {
     constructor() {
         super('BanLogManager', 'banLogTab', 'banLogTab');
-        
-        this.generatedChunksMatrix = []; 
+
+        this.generatedChunksMatrix = [];
         this.activeChunkMatrixIndex = 0;
     }
 

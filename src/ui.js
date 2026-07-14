@@ -53,7 +53,7 @@ const UI = {
 UI.tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
         UI.tabButtons.forEach(b => b.classList.remove('active'));
-        UI.viewPanels.forEach(p => p.classList.remove('active'));
+        UI.viewPanels.forEach(p => p.classList.remove('active')); //This is a test comment
         
         btn.classList.add('active');
         const target = btn.getAttribute('data-target');

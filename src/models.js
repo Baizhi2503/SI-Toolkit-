@@ -171,7 +171,7 @@ class ScamCase {
         this.evidenceLink = '';
         this.isFinalized = false;
     }
-
+    //This is a test comment
     getActiveSuspect() {
         if (!Array.isArray(this.suspects) || this.suspects.length === 0) {
             this.suspects = [{ id: 1, name: "Suspect #1", discordIds: [], robloxIds: [] }];

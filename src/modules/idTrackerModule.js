@@ -182,14 +182,14 @@ class IdTrackerModule extends BaseModule {
         removeBtn.className = 'remove-x';
         removeBtn.innerHTML = ' &times;';
         removeBtn.style.cursor = 'pointer';
-        
+
         removeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (currentCase.isFinalized) return;
-            
+
             currentCase.removeIdentity(type, id);
             this.renderChips(currentCase);
-            
+
             if (typeof window.triggerSilentWorkspaceAutoSave === 'function') {
                 window.triggerSilentWorkspaceAutoSave();
             }
