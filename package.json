@@ -1,6 +1,6 @@
 {
   "name": "si-toolkit",
-  "version": "1.3.4",
+  "version": "1.4.0",
   "description": "SI Investigation Portal with Advanced Modular Workspace UI",
   "main": "main.js",
   "scripts": {
