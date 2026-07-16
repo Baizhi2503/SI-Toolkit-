@@ -12,6 +12,10 @@ const SettingsModule = require('./src/modules/settingsModule');
 const { buildDynamicGroupContainerCard, attachCardGroupingDragListeners, checkAndDissolveGroup } = require('./src/components/DashboardHubComponent');
 const ThemeEngine = require('./src/engines/themeEngine');
 
+let currentPendingPage = 1;
+let currentFinalizedPage = 1;
+const CARDS_PER_PAGE = 4;
+
 class InvestigationPortal {
     constructor() {
         this.db = null;
@@ -179,7 +183,7 @@ function main() {
 
     window.triggerSilentWorkspaceAutoSave = () => {
         const currentCase = app.getCurrentCase();
-        if (!currentCase || currentCase.isFinalized) return; //This is a test comment
+        if (!currentCase || currentCase.isFinalized) return;
 
         updateSyncUIIndicator('syncing');
 
@@ -266,7 +270,7 @@ function main() {
                 for (let i = app.db.activeCases.length - 1; i >= 0; i--) {
                     let item = app.db.activeCases[i];
                     if (item.type === 'group') {
-                        item.cases = item.cases.filter(child => child.ticketId !== activeCase.ticketId); //This is a test comment
+                        item.cases = item.cases.filter(child => child.ticketId !== activeCase.ticketId);
                         checkAndDissolveGroup(app, i, false); 
                     } else if (item.ticketId === activeCase.ticketId) {
                         app.db.activeCases.splice(i, 1);
@@ -448,46 +452,44 @@ function main() {
             if (dashboardLayout) dashboardLayout.style.display = 'grid';
             if (newCaseBtn) newCaseBtn.style.display = 'block';
 
-            if (app.db.activeCases.length === 0) {
-                pContainer.innerHTML = `
-                    <div style="color: var(--text-muted); font-size: 13px; font-style: italic; background: var(--theme-panel-tint); padding: 15px; border-radius: 6px; border: 1px dashed var(--border);">
-                        No active investigations found.
-                    </div>
-                `;
+            const totalPending = app.db.activeCases.length;
+            const maxPendingPages = Math.max(1, Math.ceil(totalPending / CARDS_PER_PAGE));
+            if (currentPendingPage > maxPendingPages) currentPendingPage = maxPendingPages;
 
-                let emptyStateBanner = document.getElementById('dashboardEmptyStateBanner');
-                if (!emptyStateBanner) {
-                    emptyStateBanner = document.createElement('div');
-                    emptyStateBanner.id = 'dashboardEmptyStateBanner';
-                    emptyStateBanner.style.cssText = `
-                        grid-column: 1 / -1;
+            const pendingStart = (currentPendingPage - 1) * CARDS_PER_PAGE;
+            const pendingSlice = app.db.activeCases.slice(pendingStart, pendingStart + CARDS_PER_PAGE);
+
+            const pendingControls = document.getElementById('pendingPaginationControls');
+            if (pendingControls) pendingControls.style.display = totalPending > CARDS_PER_PAGE ? 'flex' : 'none';
+            
+            const pendingStatusText = document.getElementById('pendingPageStatusText');
+            if (pendingStatusText) pendingStatusText.textContent = `${currentPendingPage} / ${maxPendingPages}`;
+
+            if (totalPending === 0) {
+                pContainer.innerHTML = `
+                    <div id="dashboardEmptyStateBanner" style="
                         text-align: center;
-                        padding: 60px 20px;
-                        margin-top: 40px;
+                        padding: 40px 20px;
                         background: var(--theme-panel-tint);
                         border: 1px solid var(--border);
                         border-radius: 12px;
                         font-family: monospace;
-                    `;
-                    emptyStateBanner.innerHTML = `
-                        <h2 style="color: var(--theme-accent); font-size: 20px; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 8px;">
+                        box-shadow: 0 4px 12px var(--theme-glow);
+                        margin-bottom: 15px;
+                    ">
+                        <h2 style="color: var(--theme-accent); font-size: 18px; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 8px; border-bottom: none; padding-bottom: 0;">
                             Ready to begin the hunt?
                         </h2>
-                        <p style="color: var(--theme-text-tint); font-size: 14px; font-weight: 600;">
+                        <p style="color: var(--theme-text-tint); font-size: 13px; font-weight: 600; margin: 0;">
                             Click <span style="background: var(--theme-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-size: 12px; font-weight: bold;">New Case</span> to start hunting!!!
                         </p>
-                    `;
-                    dashboardLayout.appendChild(emptyStateBanner);
-                } else {
-                    emptyStateBanner.style.display = 'block';
-                }
+                    </div>
+                `;
             } else {
-                const emptyStateBanner = document.getElementById('dashboardEmptyStateBanner');
-                if (emptyStateBanner) emptyStateBanner.remove();
-
-                app.db.activeCases.forEach((item, index) => {
+                pendingSlice.forEach((item, index) => {
+                    const actualDbIndex = pendingStart + index;
                     if (item.type === 'group') {
-                        const groupCard = buildDynamicGroupContainerCard(item, index, buildDynamicPortalCaseCardElement);
+                        const groupCard = buildDynamicGroupContainerCard(item, actualDbIndex, buildDynamicPortalCaseCardElement);
                         pContainer.appendChild(groupCard);
                     } else {
                         const card = buildDynamicPortalCaseCardElement(item, false, false);
@@ -497,12 +499,26 @@ function main() {
                 });
             }
 
-            if (app.db.finalizedCases.length === 0) {
+            const totalFinalized = app.db.finalizedCases.length;
+            const maxFinalizedPages = Math.max(1, Math.ceil(totalFinalized / CARDS_PER_PAGE));
+            if (currentFinalizedPage > maxFinalizedPages) currentFinalizedPage = maxFinalizedPages;
+
+            const finalizedStart = (currentFinalizedPage - 1) * CARDS_PER_PAGE;
+            const finalizedSlice = app.db.finalizedCases.slice(finalizedStart, finalizedStart + CARDS_PER_PAGE);
+
+            const finalizedControls = document.getElementById('finalizedPaginationControls');
+            if (finalizedControls) finalizedControls.style.display = totalFinalized > CARDS_PER_PAGE ? 'flex' : 'none';
+            
+            const finalizedStatusText = document.getElementById('finalizedPageStatusText');
+            if (finalizedStatusText) finalizedStatusText.textContent = `${currentFinalizedPage} / ${maxFinalizedPages}`;
+
+            if (totalFinalized === 0) {
                 fContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; font-style: italic; background: var(--theme-panel-tint); padding: 15px; border-radius: 6px; border: 1px dashed var(--border);">No finalized logs discovered.</div>`;
             } else {
-                app.db.finalizedCases.forEach((item, index) => {
+                finalizedSlice.forEach((item, index) => {
+                    const actualDbIndex = finalizedStart + index;
                     if (item.type === 'group') {
-                        const groupCard = buildDynamicGroupContainerCard(item, index, buildDynamicPortalCaseCardElement);
+                        const groupCard = buildDynamicGroupContainerCard(item, actualDbIndex, buildDynamicPortalCaseCardElement);
                         fContainer.appendChild(groupCard);
                     } else {
                         fContainer.appendChild(buildDynamicPortalCaseCardElement(item, true, false));
@@ -658,6 +674,39 @@ function main() {
         return card;
     }
 
+    const initPaginationListeners = () => {
+        document.getElementById('prevPendingPageBtn')?.addEventListener('click', () => {
+            if (currentPendingPage > 1) {
+                currentPendingPage--;
+                window.renderPortalDashboardHub();
+            }
+        });
+
+        document.getElementById('nextPendingPageBtn')?.addEventListener('click', () => {
+            const maxPages = Math.ceil(app.db.activeCases.length / CARDS_PER_PAGE);
+            if (currentPendingPage < maxPages) {
+                currentPendingPage++;
+                window.renderPortalDashboardHub();
+            }
+        });
+
+        document.getElementById('prevFinalizedPageBtn')?.addEventListener('click', () => {
+            if (currentFinalizedPage > 1) {
+                currentFinalizedPage--;
+                window.renderPortalDashboardHub();
+            }
+        });
+
+        document.getElementById('nextFinalizedPageBtn')?.addEventListener('click', () => {
+            const maxPages = Math.ceil(app.db.finalizedCases.length / CARDS_PER_PAGE);
+            if (currentFinalizedPage < maxPages) {
+                currentFinalizedPage++;
+                window.renderPortalDashboardHub();
+            }
+        });
+    };
+    
+    initPaginationListeners();
     window.renderPortalDashboardHub();
 }
 

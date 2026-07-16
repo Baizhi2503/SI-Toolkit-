@@ -349,10 +349,20 @@
                 <div>
                     <h3 style="color: var(--theme-accent); margin-bottom: 15px; font-size: 15px; font-family: monospace; font-weight: bold; letter-spacing: 0.5px;"> Active Investigations</h3>
                     <div id="pendingCasesContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                    <div id="pendingPaginationControls" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 15px; font-family: monospace; font-size: 13px;">
+                        <button id="prevPendingPageBtn" style="background: #222; border: 1px solid var(--border); color: #fff; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">&lt;</button>
+                        <span id="pendingPageStatusText" style="color: var(--text-muted);">1 / 1</span>
+                        <button id="nextPendingPageBtn" style="background: #222; border: 1px solid var(--border); color: #fff; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">&gt;</button>
+                    </div>
                 </div>
                 <div>
                     <h3 style="color: var(--theme-accent-dark); margin-bottom: 15px; font-size: 15px; font-family: monospace; font-weight: bold; letter-spacing: 0.5px;"> Finalized Action Logs</h3>
                     <div id="finalizedCasesContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                    <div id="finalizedPaginationControls" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 15px; font-family: monospace; font-size: 13px;">
+                        <button id="prevFinalizedPageBtn" style="background: #222; border: 1px solid var(--border); color: #fff; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">&lt;</button>
+                        <span id="finalizedPageStatusText" style="color: var(--text-muted);">1 / 1</span>
+                        <button id="nextFinalizedPageBtn" style="background: #222; border: 1px solid var(--border); color: #fff; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">&gt;</button>
+                    </div>
                 </div>
             </div>
         </div>
