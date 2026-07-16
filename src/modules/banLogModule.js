@@ -20,6 +20,10 @@ class BanLogModule extends BaseModule {
         this.paginationStatus = document.getElementById('banLogPaginationStatus');
         this.reasonCheckboxes = document.querySelectorAll('.ban-reason-check');
 
+        this.usdInput = document.getElementById('converterUsdInput');
+        this.wastedDaysInput = document.getElementById('converterWastedDaysInput');
+        this.resultDurationDisplay = document.getElementById('converterResultDurationDisplay');
+
         this.setupListeners();
     }
 
@@ -31,9 +35,28 @@ class BanLogModule extends BaseModule {
             }
         };
 
-        if (this.lengthInput) this.lengthInput.addEventListener('input', renderTrigger);
-        if (this.evidenceInput) this.evidenceInput.addEventListener('input', renderTrigger);
+        let moduleCompileTimeout = null;
+        const debouncedModuleTrigger = () => {
+            clearTimeout(moduleCompileTimeout);
+            moduleCompileTimeout = setTimeout(() => {
+                this.compileBanLogText();
+            }, 300); 
+        };
+
+        if (this.lengthInput) {
+            this.lengthInput.addEventListener('input', debouncedModuleTrigger);
+            this.lengthInput.addEventListener('change', renderTrigger);
+        }
+        if (this.evidenceInput) {
+            this.evidenceInput.addEventListener('input', debouncedModuleTrigger);
+            this.evidenceInput.addEventListener('change', renderTrigger);
+        }
+        
         this.reasonCheckboxes.forEach(box => box.addEventListener('change', renderTrigger));
+
+        const runMatrixConversionMath = () => this.processDynamicMatrixConversion();
+        this.usdInput?.addEventListener('input', runMatrixConversionMath);
+        this.wastedDaysInput?.addEventListener('input', runMatrixConversionMath);
 
         if (this.prevChunkBtn) {
             this.prevChunkBtn.addEventListener('click', () => {
@@ -72,6 +95,37 @@ class BanLogModule extends BaseModule {
                 }, 1200);
             });
         }
+    }
+
+    processDynamicMatrixConversion() {
+        if (!this.usdInput || !this.wastedDaysInput || !this.resultDurationDisplay) return;
+
+        const rawUsdValue = parseFloat(this.usdInput.value);
+        const wastedDays = parseInt(this.wastedDaysInput.value) || 0;
+
+        if (isNaN(rawUsdValue)) {
+            this.resultDurationDisplay.textContent = "0 Months";
+            return;
+        }
+
+        const usd = rawUsdValue;
+
+        if (usd > 500) {
+            alert("The value is too big to handle alone, reach out for a team!!");
+            this.usdInput.value = 500;
+            this.processDynamicMatrixConversion();
+            return;
+        }
+
+        const clampedUsd = Math.max(10, Math.min(150, usd));
+        const valueComponent = 1 + (clampedUsd - 10) * 0.05;
+
+        const timeComponent = wastedDays * (1 / 15);
+
+        const finalCalculatedDuration = Math.round(valueComponent + timeComponent);
+        const cappedFinalDuration = Math.min(12, finalCalculatedDuration);
+
+        this.resultDurationDisplay.textContent = `${cappedFinalDuration} Months`;
     }
 
     onActivate() {
@@ -127,6 +181,10 @@ class BanLogModule extends BaseModule {
 
         this.activeChunkMatrixIndex = 0;
         this.updatePaginationUI();
+        
+        if (this.usdInput) this.usdInput.value = '';
+        if (this.wastedDaysInput) this.wastedDaysInput.value = '';
+        if (this.resultDurationDisplay) this.resultDurationDisplay.textContent = '0 Months';
     }
 
     updatePaginationUI() {

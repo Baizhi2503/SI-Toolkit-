@@ -74,13 +74,18 @@ const app = new InvestigationPortal();
 window.app = app;
 
 function main() {
+    const globalLoader = document.getElementById('portalGlobalLoadingScreen');
+    if (globalLoader) {
+        globalLoader.style.display = 'flex';
+        globalLoader.style.opacity = '1';
+    }
+
     app.init();
 
     const savedThemeId = (app.db.investigatorProfile && app.db.investigatorProfile.activeTheme) ? app.db.investigatorProfile.activeTheme : 'red';
     ThemeEngine.applyTheme(savedThemeId);
 
     let autoSaveTimeout = null;
-    const globalLoader = document.getElementById('portalGlobalLoadingScreen');
 
     window.executeWithLoadingOverlay = (taskCallback) => {
         if (!globalLoader) {
@@ -185,8 +190,6 @@ function main() {
         const currentCase = app.getCurrentCase();
         if (!currentCase || currentCase.isFinalized) return;
 
-        updateSyncUIIndicator('syncing');
-
         const ticketInput = document.getElementById('ticketIdInput');
         if (ticketInput && ticketInput.value.trim()) {
             currentCase.ticketId = ticketInput.value.trim();
@@ -235,12 +238,15 @@ function main() {
         }
     };
 
-    const handleWorkspaceInputQueue = () => {
+    const handleWorkspaceInputQueue = (e) => {
         const currentCase = app.getCurrentCase();
         if (!currentCase || currentCase.isFinalized) return;
-        updateSyncUIIndicator('syncing');
+        
         clearTimeout(autoSaveTimeout);
-        autoSaveTimeout = setTimeout(() => { window.triggerSilentWorkspaceAutoSave(); }, 500);
+        autoSaveTimeout = setTimeout(() => { 
+            updateSyncUIIndicator('syncing');
+            window.triggerSilentWorkspaceAutoSave(); 
+        }, 1500); 
     };
 
     window.addEventListener('input', handleWorkspaceInputQueue);
@@ -271,7 +277,7 @@ function main() {
                     let item = app.db.activeCases[i];
                     if (item.type === 'group') {
                         item.cases = item.cases.filter(child => child.ticketId !== activeCase.ticketId);
-                        checkAndDissolveGroup(app, i, false); 
+                        checkAndDissolveGroup(app, i, false);
                     } else if (item.ticketId === activeCase.ticketId) {
                         app.db.activeCases.splice(i, 1);
                     }
@@ -298,6 +304,7 @@ function main() {
     document.getElementById('manualSaveBtn').addEventListener('click', (e) => {
         e.preventDefault();
         if (!app.getCurrentCase() || app.getCurrentCase().isFinalized) return;
+        updateSyncUIIndicator('syncing');
         window.triggerSilentWorkspaceAutoSave();
         const saveBtn = document.getElementById('manualSaveBtn');
         const nativeLabelText = saveBtn.innerHTML;
@@ -766,6 +773,15 @@ function main() {
     
     initPaginationListeners();
     window.renderPortalDashboardHub();
+
+    if (globalLoader) {
+        setTimeout(() => {
+            globalLoader.style.opacity = '0';
+            setTimeout(() => {
+                globalLoader.style.display = 'none';
+            }, 200);
+        }, 600);
+    }
 }
 
 window.addEventListener('DOMContentLoaded', main);

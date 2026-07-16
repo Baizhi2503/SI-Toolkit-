@@ -36,10 +36,18 @@ class ClipboardModule extends BaseModule {
     }
 
     setupListeners() {
-        const renderTrigger = () => this.triggerLivePreviewRender();
+        let templateCompileTimeout = null;
+        const debouncedRenderTrigger = () => {
+            clearTimeout(templateCompileTimeout);
+            templateCompileTimeout = setTimeout(() => {
+                this.triggerLivePreviewRender();
+            }, 300); 
+        };
+
+        const staticRenderTrigger = () => this.triggerLivePreviewRender();
 
         if (this.dropdownSelector) {
-            this.dropdownSelector.addEventListener('change', renderTrigger);
+            this.dropdownSelector.addEventListener('change', staticRenderTrigger);
         }
 
         Object.keys(this.tokenInputs).forEach(key => {
@@ -48,12 +56,12 @@ class ClipboardModule extends BaseModule {
 
             if (key === 'evidence') {
                 el.querySelectorAll('input').forEach(inp => {
-                    inp.addEventListener('input', renderTrigger);
-                    inp.addEventListener('change', renderTrigger);
+                    inp.addEventListener('input', debouncedRenderTrigger);
+                    inp.addEventListener('change', staticRenderTrigger);
                 });
             } else {
-                el.addEventListener('input', renderTrigger);
-                el.addEventListener('change', renderTrigger);
+                el.addEventListener('input', debouncedRenderTrigger);
+                el.addEventListener('change', staticRenderTrigger);
             }
         });
 
@@ -77,8 +85,8 @@ class ClipboardModule extends BaseModule {
                 `;
 
                 row.querySelectorAll('input').forEach(inp => {
-                    inp.addEventListener('input', renderTrigger);
-                    inp.addEventListener('change', renderTrigger);
+                    inp.addEventListener('input', debouncedRenderTrigger);
+                    inp.addEventListener('change', staticRenderTrigger);
                 });
 
                 row.querySelector('.remove-evidence-btn').addEventListener('click', (ev) => {
@@ -204,7 +212,7 @@ class ClipboardModule extends BaseModule {
 
         const vals = {
             date: this.getValueOrDefault(this.tokenInputs.date, '[DATE]'),
-            suspectUser: this.getValueOrDefault(this.tokenInputs.suspectUser, '[SUSPECT_USERNAME]'), //This is a test comment
+            suspectUser: this.getValueOrDefault(this.tokenInputs.suspectUser, '[SUSPECT_USERNAME]'),
             victimUser: this.getValueOrDefault(this.tokenInputs.victimUser, '[VICTIM_USERNAME]'),
             sReason: this.getValueOrDefault(this.tokenInputs.sReason, '[S_REASON]'),
             reason: this.getValueOrDefault(this.tokenInputs.reason, '[REASON]'),

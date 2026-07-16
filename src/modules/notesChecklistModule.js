@@ -20,7 +20,7 @@ class NotesChecklistModule extends BaseModule {
         };
 
         if (this.notesArea) {
-            this.notesArea.addEventListener('input', triggerSave);
+            this.notesArea.addEventListener('change', triggerSave);
         }
 
         this.stepRadios.forEach(radio => {
