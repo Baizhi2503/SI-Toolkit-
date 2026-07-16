@@ -405,6 +405,25 @@ function main() {
         });
     }
 
+    function doesCaseMatchQuery(c, query) {
+        if (!query) return true;
+        const term = query.toLowerCase();
+
+        if (c.ticketId && c.ticketId.toLowerCase().includes(term)) return true;
+        if (c.banLength && c.banLength.toLowerCase().includes(term)) return true;
+        if (c.notes && c.notes.toLowerCase().includes(term)) return true;
+        if (c.selectedRules && c.selectedRules.some(r => r.toLowerCase().includes(term))) return true;
+
+        if (c.suspects && Array.isArray(c.suspects)) {
+            for (let s of c.suspects) {
+                if (s.name && s.name.toLowerCase().includes(term)) return true;
+                if (s.discordIds && s.discordIds.some(id => id.toLowerCase().includes(term))) return true;
+                if (s.robloxIds && s.robloxIds.some(id => id.toLowerCase().includes(term))) return true;
+            }
+        }
+        return false;
+    }
+
     window.renderPortalDashboardHub = function() {
         app.db = StorageController.load();
         const pContainer = document.getElementById('pendingCasesContainer');
@@ -452,12 +471,23 @@ function main() {
             if (dashboardLayout) dashboardLayout.style.display = 'grid';
             if (newCaseBtn) newCaseBtn.style.display = 'block';
 
-            const totalPending = app.db.activeCases.length;
+            const searchInput = document.getElementById('globalPortalSearchBar');
+            const query = searchInput ? searchInput.value.trim() : "";
+
+            const filteredActiveCases = app.db.activeCases.filter(item => {
+                if (item.type === 'group') {
+                    return item.title.toLowerCase().includes(query.toLowerCase()) || 
+                           item.cases.some(c => doesCaseMatchQuery(c, query));
+                }
+                return doesCaseMatchQuery(item, query);
+            });
+
+            const totalPending = filteredActiveCases.length;
             const maxPendingPages = Math.max(1, Math.ceil(totalPending / CARDS_PER_PAGE));
             if (currentPendingPage > maxPendingPages) currentPendingPage = maxPendingPages;
 
             const pendingStart = (currentPendingPage - 1) * CARDS_PER_PAGE;
-            const pendingSlice = app.db.activeCases.slice(pendingStart, pendingStart + CARDS_PER_PAGE);
+            const pendingSlice = filteredActiveCases.slice(pendingStart, pendingStart + CARDS_PER_PAGE);
 
             const pendingControls = document.getElementById('pendingPaginationControls');
             if (pendingControls) pendingControls.style.display = totalPending > CARDS_PER_PAGE ? 'flex' : 'none';
@@ -478,10 +508,10 @@ function main() {
                         margin-bottom: 15px;
                     ">
                         <h2 style="color: var(--theme-accent); font-size: 18px; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 8px; border-bottom: none; padding-bottom: 0;">
-                            Ready to begin the hunt?
+                            ${query ? 'No matching logs found' : 'Ready to begin the hunt?'}
                         </h2>
                         <p style="color: var(--theme-text-tint); font-size: 13px; font-weight: 600; margin: 0;">
-                            Click <span style="background: var(--theme-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-size: 12px; font-weight: bold;">New Case</span> to start hunting!!!
+                            ${query ? 'Try loosening your alphanumeric query filters.' : 'Click <span style="background: var(--theme-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-size: 12px; font-weight: bold;">New Case</span> to start hunting!!!'}
                         </p>
                     </div>
                 `;
@@ -499,12 +529,20 @@ function main() {
                 });
             }
 
-            const totalFinalized = app.db.finalizedCases.length;
+            const filteredFinalizedCases = app.db.finalizedCases.filter(item => {
+                if (item.type === 'group') {
+                    return item.title.toLowerCase().includes(query.toLowerCase()) || 
+                           item.cases.some(c => doesCaseMatchQuery(c, query));
+                }
+                return doesCaseMatchQuery(item, query);
+            });
+
+            const totalFinalized = filteredFinalizedCases.length;
             const maxFinalizedPages = Math.max(1, Math.ceil(totalFinalized / CARDS_PER_PAGE));
             if (currentFinalizedPage > maxFinalizedPages) currentFinalizedPage = maxFinalizedPages;
 
             const finalizedStart = (currentFinalizedPage - 1) * CARDS_PER_PAGE;
-            const finalizedSlice = app.db.finalizedCases.slice(finalizedStart, finalizedStart + CARDS_PER_PAGE);
+            const finalizedSlice = filteredFinalizedCases.slice(finalizedStart, finalizedStart + CARDS_PER_PAGE);
 
             const finalizedControls = document.getElementById('finalizedPaginationControls');
             if (finalizedControls) finalizedControls.style.display = totalFinalized > CARDS_PER_PAGE ? 'flex' : 'none';
@@ -513,7 +551,7 @@ function main() {
             if (finalizedStatusText) finalizedStatusText.textContent = `${currentFinalizedPage} / ${maxFinalizedPages}`;
 
             if (totalFinalized === 0) {
-                fContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; font-style: italic; background: var(--theme-panel-tint); padding: 15px; border-radius: 6px; border: 1px dashed var(--border);">No finalized logs discovered.</div>`;
+                fContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; font-style: italic; background: var(--theme-panel-tint); padding: 15px; border-radius: 6px; border: 1px dashed var(--border); width: 100%; text-align: center;">${query ? 'No matching history discovered.' : 'No finalized action logs discovered.'}</div>`;
             } else {
                 finalizedSlice.forEach((item, index) => {
                     const actualDbIndex = finalizedStart + index;
@@ -683,7 +721,14 @@ function main() {
         });
 
         document.getElementById('nextPendingPageBtn')?.addEventListener('click', () => {
-            const maxPages = Math.ceil(app.db.activeCases.length / CARDS_PER_PAGE);
+            const searchInput = document.getElementById('globalPortalSearchBar');
+            const query = searchInput ? searchInput.value.trim() : "";
+            const filteredCount = app.db.activeCases.filter(item => {
+                if (item.type === 'group') return item.title.toLowerCase().includes(query.toLowerCase()) || item.cases.some(c => doesCaseMatchQuery(c, query));
+                return doesCaseMatchQuery(item, query);
+            }).length;
+
+            const maxPages = Math.ceil(filteredCount / CARDS_PER_PAGE);
             if (currentPendingPage < maxPages) {
                 currentPendingPage++;
                 window.renderPortalDashboardHub();
@@ -698,11 +743,24 @@ function main() {
         });
 
         document.getElementById('nextFinalizedPageBtn')?.addEventListener('click', () => {
-            const maxPages = Math.ceil(app.db.finalizedCases.length / CARDS_PER_PAGE);
+            const searchInput = document.getElementById('globalPortalSearchBar');
+            const query = searchInput ? searchInput.value.trim() : "";
+            const filteredCount = app.db.finalizedCases.filter(item => {
+                if (item.type === 'group') return item.title.toLowerCase().includes(query.toLowerCase()) || item.cases.some(c => doesCaseMatchQuery(c, query));
+                return doesCaseMatchQuery(item, query);
+            }).length;
+
+            const maxPages = Math.ceil(filteredCount / CARDS_PER_PAGE);
             if (currentFinalizedPage < maxPages) {
                 currentFinalizedPage++;
                 window.renderPortalDashboardHub();
             }
+        });
+
+        document.getElementById('globalPortalSearchBar')?.addEventListener('input', () => {
+            currentPendingPage = 1;
+            currentFinalizedPage = 1;
+            window.renderPortalDashboardHub();
         });
     };
     
