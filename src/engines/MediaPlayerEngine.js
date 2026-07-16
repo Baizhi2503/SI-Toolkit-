@@ -47,6 +47,22 @@ class MediaPlayerEngine {
     setupUIBindings() {
         const getEl = id => document.getElementById(id);
 
+        getEl('clearAllFramesBtn')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            const currentCase = this.mod.app.getCurrentCase();
+            if (!currentCase) return alert("Please initiate an active Case Workspace first.");
+            if (!currentCase.evidenceFrames || currentCase.evidenceFrames.length === 0) {
+                return alert("Your timeline container is already completely empty.");
+            }
+
+            if (confirm(`⚠️ FLUSH SCREENSHOT TIMELINE:\nAre you sure you want to permanently delete all ${currentCase.evidenceFrames.length} captured snapshots from this active workspace?`)) {
+                currentCase.evidenceFrames = [];
+                
+                this.triggerWorkspaceAutoSaveNotification();
+                this.renderGalleryTimeline();
+            }
+        });
+
         getEl('canvasZoomSlider')?.addEventListener('input', (e) => {
             if (this.activeCanvasTool === 'hand') {
                 const targetScale = parseFloat(e.target.value);
