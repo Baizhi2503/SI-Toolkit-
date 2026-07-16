@@ -138,25 +138,38 @@ class ClipboardModule extends BaseModule {
         if (!this.dropdownSelector || !this.livePreviewArea) return;
         const activeTemplateKey = this.dropdownSelector.value;
 
-        const templateFieldMap = {
-            victimDm: ['date'], 
-            suspectDm: ['victimUser', 'reason', 'evidence'], 
-            verdict: ['suspectUser', 'victimUser', 'sReason', 'vReason', 'evidence', 'message']
-        };
+        const activeTemplateText = (this.app && this.app.db && this.app.db.customTemplates)
+        ? this.app.db.customTemplates[activeTemplateKey] || ''
+        : (embeddedTemplatesRegistry[activeTemplateKey] || '');
 
-        const activeFields = templateFieldMap[activeTemplateKey] || [];
+        const tokenScanMap = {
+            date: '[DATE]',
+            suspectUser: '[SUSPECT_USERNAME]',
+            victimUser: '[VICTIM_USERNAME]',
+            sReason: '[S_REASON]',
+            reason: '[REASON]',
+            vReason: '[V_REASON]',
+            evidence: '[EVIDENCE]',
+            message: '[MESSAGE]'
+        };
 
         Object.keys(this.tokenInputs).forEach(key => {
             const inputElement = this.tokenInputs[key];
             if (inputElement) {
                 const wrapper = inputElement.closest('.form-group');
                 if (wrapper) {
-                    wrapper.style.display = activeFields.includes(key) ? 'flex' : 'none';
+                    const targetToken = tokenScanMap[key];
+                    
+                    if (activeTemplateText.includes(targetToken)) {
+                        wrapper.style.display = 'flex';
+                    } else {
+                        wrapper.style.display = 'none';
+                    }
                 }
             }
         });
 
-        this.livePreviewArea.value = this.compileTemplate(activeTemplateKey);
+        this.livePreviewArea.value = this.compileTemplate(activeTemplateKey);    
     }
 
     getValueOrDefault(element, defaultPlaceholderValue) {
@@ -167,7 +180,9 @@ class ClipboardModule extends BaseModule {
     }
 
     compileTemplate(templateType) {
-        let output = embeddedTemplatesRegistry[templateType] || '';
+        let output = (this.app && this.app.db && this.app.db.customTemplates)
+        ? this.app.db.customTemplates[templateType] || ''
+        : (embeddedTemplatesRegistry[templateType] || '');
         
         let compiledEvidenceMarkdown = '[EVIDENCE]';
         if (this.evidenceListContainer) {
