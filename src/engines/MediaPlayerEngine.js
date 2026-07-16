@@ -46,6 +46,30 @@ class MediaPlayerEngine {
 
     setupUIBindings() {
         const getEl = id => document.getElementById(id);
+
+        getEl('canvasZoomSlider')?.addEventListener('input', (e) => {
+            if (this.activeCanvasTool === 'hand') {
+                const targetScale = parseFloat(e.target.value);
+                const previousScale = this.currentZoomScale;
+                
+                const vWidth = this.canvasViewportContainer.clientWidth;
+                const vHeight = this.canvasViewportContainer.clientHeight;
+                const centerX = vWidth / 2;
+                const centerY = vHeight / 2;
+                
+                const canvasX = (centerX - this.currentPanX) / previousScale;
+                const canvasY = (centerY - this.currentPanY) / previousScale;
+                
+                this.currentZoomScale = targetScale;
+                this.currentPanX = centerX - canvasX * this.currentZoomScale;
+                this.currentPanY = centerY - canvasY * this.currentZoomScale;
+                
+                if (this.zoomPercentDisplay) {
+                    this.zoomPercentDisplay.textContent = `${Math.round(this.currentZoomScale * 100)}%`;
+                }
+                this.applyViewportTransformations();
+            }
+        });
         
         getEl('canvasHandBtn')?.addEventListener('click', () => { this.activeCanvasTool = 'hand'; this.updateToolUIState(); });
         getEl('canvasRedBtn')?.addEventListener('click', () => { 
